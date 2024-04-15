@@ -1,0 +1,53 @@
+{
+    "data": [
+      {
+        "class": "blean",
+        "positive_weights": 4.454753
+      },
+      {
+        "class": "fidg",
+        "positive_weights": 4.232109
+      },
+      {
+        "class": "flean",
+        "positive_weights": 4.963918
+      },
+      {
+        "class": "fmov",
+        "positive_weights": 2.340693
+      },
+      {
+        "class": "hmov",
+        "positive_weights": 2.237775
+      },
+      {
+        "class": "hnod",
+        "positive_weights": 2.690381
+      },
+      {
+        "class": "hshk",
+        "positive_weights": 3.954961
+      },
+      {
+        "class": "htfa",
+        "positive_weights": 5.36731
+      },
+      {
+        "class": "readj",
+        "positive_weights": 3.985685
+      },
+      {
+        "class": "shrai",
+        "positive_weights": 5.36731
+      },
+      {
+        "class": "mov",
+        "positive_weights": 1.681385
+      },
+      {
+        "class": "bg",
+        "positive_weights": 0.777096
+      }
+    ]
+  }
+  

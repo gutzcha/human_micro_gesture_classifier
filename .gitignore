@@ -13,24 +13,24 @@
 # Ignore PyTorch model files
 *.pth
 *.pt
-*.joblib
+#*.joblib
 
 # Ignore Jupyter Notebook temporary files
-.ipynb_checkpoints/
-*.ipynb_checkpoints/
+#.ipynb_checkpoints/
+#*.ipynb_checkpoints/
 
 # Ignore virtual environment
-venv/
-env/
-.venv/
-*.env/
+#venv/
+#env/
+#.venv/
+#*.env/
 
 # Ignore Python bytecode files
-__pycache__/
+# __pycache__/
 
 # Ignore logs and other generated files
-logs/
-*.log
+# logs/
+#*.log
 *.txt
 *.csv
 
@@ -38,48 +38,17 @@ logs/
 *.pyc
 
 # Ignore cache and temporary files
-.cache/
-.tmp/
-.temp/
-*.swp
-*.swo
+#.cache/
+#.tmp/
+#.temp/
+#*.swp
+#*.swo
 
 # Ignore system files
-.DS_Store
-Thumbs.db
+# .DS_Store
+# Thumbs.db
 
 # Ignore tensorboard ogs
 *events.out.tfevents.*
 
-all_data.csv
-*.joblib./scripts/dyadic_communication_5vid_clean/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_kinetic_400/checkpoint-199/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_5vid_clean/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_kinetic_400/checkpoint-best/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_5vid_clean/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_kinetic_400/checkpoint-99/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_5vid/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-199/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_5vid/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-399/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_5vid/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-299/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_5vid/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-best/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_5vid/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-499/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_5vid/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-99/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_001/checkpoint-2399.pth
-./scripts/dyadic_communication_001/checkpoint-2400.pth
-./scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-29/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-199/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-49/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-399/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-9/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-39/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-299/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-best/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-499/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-99/mp_rank_00_model_states.pt
-./scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-19/mp_rank_00_model_states.pt
-./.git/objects/pack/pack-65160573e2f0b84b644bf836fa77c80dc59c61c0.pack
-./preliminary_results_svm/input_features.joblib
-./preliminary_results_svm/X_train.joblib
-./preliminary_results_svm/X_test.joblib
-./preliminary_results_svm/multi_label_svm_model.joblib
-./pretrained/VideoMAE_ViT-H_checkpoint_Kinetics-400.pth
-./pretrained/VideoMAE_ViT-B_checkpoint_Kinetics-400.pth
-./pretrained/VideoMAE_ViT-B_checkpoint_ucf101.pth
-./testing_new_model_debug/VideoMAE_ViT-B_checkpoint_Kinetics-400.pth
+

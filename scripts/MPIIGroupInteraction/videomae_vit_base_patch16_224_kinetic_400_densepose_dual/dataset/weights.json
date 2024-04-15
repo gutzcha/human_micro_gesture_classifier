@@ -1,0 +1,74 @@
+{
+    "data": [
+        {
+            "class": "Adjusting_clothing",
+            "positive_weights": 4.386373896768402,
+            "negative_weights": 0.17347553254550552
+        },
+        {
+            "class": "Fold_arms",
+            "positive_weights": 2.6893107606993603,
+            "negative_weights": 0.24174580906307425
+        },
+        {
+            "class": "Fumble",
+            "positive_weights": 2.0257405974831015,
+            "negative_weights": 0.32671764451596197
+        },
+        {
+            "class": "Gesture",
+            "positive_weights": 1.8648176876641176,
+            "negative_weights": 0.3591651177886506
+        },
+        {
+            "class": "Groom",
+            "positive_weights": 4.441058592587472,
+            "negative_weights": 0.17268805938490406
+        },
+        {
+            "class": "Hand_face",
+            "positive_weights": 3.5014471041877053,
+            "negative_weights": 0.1947628911999013
+        },
+        {
+            "class": "Hand_mouth",
+            "positive_weights": 3.762219587695408,
+            "negative_weights": 0.18638815652345544
+        },
+        {
+            "class": "Leg_movement",
+            "positive_weights": 2.681519483760114,
+            "negative_weights": 0.2424226468657327
+        },
+        {
+            "class": "Legs_crossed",
+            "positive_weights": 0.8388929574020592,
+            "negative_weights": 0.8651348235576017
+        },
+        {
+            "class": "Scratch",
+            "positive_weights": 3.4790117956385482,
+            "negative_weights": 0.19559449943651427
+        },
+        {
+            "class": "Settle",
+            "positive_weights": 4.032099492639901,
+            "negative_weights": 0.1797890302278029
+        },
+        {
+            "class": "Shrug",
+            "positive_weights": 5.380152124120931,
+            "negative_weights": 0.16419518330962463
+        },
+        {
+            "class": "Smearing_hands",
+            "positive_weights": 4.402289352074301,
+            "negative_weights": 0.1732418219560536
+        },
+        {
+            "class": "Stretching",
+            "positive_weights": 6.464646531243256,
+            "negative_weights": 0.16060786605210367
+        }
+    ]
+}

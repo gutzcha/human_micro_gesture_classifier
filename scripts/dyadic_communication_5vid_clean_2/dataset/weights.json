@@ -1,0 +1,69 @@
+{
+    "data": [
+        {
+            "class": "blean",
+            "positive_weights": 4.123005316475889,
+            "negative_weights": -0.23597804421398724
+        },
+        {
+            "class": "flean",
+            "positive_weights": 4.052553655525278,
+            "negative_weights": -0.23504393030872447
+        },
+        {
+            "class": "fmov",
+            "positive_weights": 2.112491476352388,
+            "negative_weights": -0.14963133801759737
+        },
+        {
+            "class": "hmov",
+            "positive_weights": 1.5376773360460625,
+            "negative_weights": -0.06528448943527615
+        },
+        {
+            "class": "hnod",
+            "positive_weights": 2.352143964885451,
+            "negative_weights": -0.17157852765860443
+        },
+        {
+            "class": "hrep",
+            "positive_weights": 2.172240788955778,
+            "negative_weights": -0.1556525996978273
+        },
+        {
+            "class": "hshk",
+            "positive_weights": 3.139442576568503,
+            "negative_weights": -0.21433313086616285
+        },
+        {
+            "class": "htfa",
+            "positive_weights": 3.2632720626807994,
+            "negative_weights": -0.21839572571968233
+        },
+        {
+            "class": "hthd",
+            "positive_weights": 4.799264279007313,
+            "negative_weights": -0.24224512851379448
+        },
+        {
+            "class": "readj",
+            "positive_weights": 3.3314560808569875,
+            "negative_weights": -0.22042085060886052
+        },
+        {
+            "class": "shrai",
+            "positive_weights": 4.33345604099168,
+            "negative_weights": -0.2384026646122495
+        },
+        {
+            "class": "mov",
+            "positive_weights": 0.923984675029443,
+            "negative_weights": 0.12170667056589361
+        },
+        {
+            "class": "bg",
+            "positive_weights": 0.12170667056589361,
+            "negative_weights": 0.923984675029443
+        }
+    ]
+}
