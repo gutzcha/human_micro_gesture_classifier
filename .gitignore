@@ -52,3 +52,12 @@
 *events.out.tfevents.*
 
 
+.env
+DATASET.md
+FINETUNE.md
+LICENSE
+MODEL_ZOO.md
+NOTICE.md
+PRETRAIN.md
+README.md
+videoMAE.code-workspace
