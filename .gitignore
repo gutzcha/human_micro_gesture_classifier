@@ -6,9 +6,9 @@
 *.bmp
 
 # Ignore videos
-**/*.mp4
-**/*.avi
-**/*.mov
+*.mp4
+*.avi
+*.mov
 
 # Ignore PyTorch model files
 *.pth
