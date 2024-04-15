@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="dd76af6d-dcad-43ce-b965-f778f5fd84bc" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/data_exploration/consolidate_results.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/data_exploration/consolidate_results.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_exploration/debug_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_exploration/debug_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dyadic_communication.py" beforeDir="false" afterPath="$PROJECT_DIR$/dyadic_communication.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/engine_for_finetuning.py" beforeDir="false" afterPath="$PROJECT_DIR$/engine_for_finetuning.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exploring_new_dataset.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/exploring_new_dataset.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kinetics.py" beforeDir="false" afterPath="$PROJECT_DIR$/kinetics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modeling_pretrain.py" beforeDir="false" afterPath="$PROJECT_DIR$/modeling_pretrain.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preliminary_results_svm/X_test.joblib" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/preliminary_results_svm/X_train.joblib" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/preliminary_results_svm/input_features.joblib" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/preliminary_results_svm/multi_label_svm_model.joblib" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/preliminary_results_svm/target_labels.joblib" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/preliminary_results_svm/y_test.joblib" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/preliminary_results_svm/y_train.joblib" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_class_finetuning.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_class_finetuning.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_videomae_vis_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_videomae_vis_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scrip_run_videomae_vis_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/scrip_run_videomae_vis_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/MPIIGroupInteraction/k400_finetune_videomae_pretrain_dual_fresh_decoder_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100/pretrain.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/MPIIGroupInteraction/k400_finetune_videomae_pretrain_dual_fresh_decoder_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100/pretrain.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/video_transforms.py" beforeDir="false" afterPath="$PROJECT_DIR$/video_transforms.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2eXdYzqnTotWimTy6HafMzkKQGa" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Project-mpg microgesture/videoMAE&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-67fca87a943a-c986f194a52a-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-233.11799.259" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="dd76af6d-dcad-43ce-b965-f778f5fd84bc" name="Changes" comment="" />
+      <created>1712054907871</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1712054907871</updated>
+      <workItem from="1712054908927" duration="2057000" />
+      <workItem from="1712176403206" duration="2386000" />
+      <workItem from="1712941056101" duration="8000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
