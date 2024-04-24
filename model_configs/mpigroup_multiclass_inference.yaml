@@ -1,0 +1,51 @@
+paths:
+  project_folder: &project_folder ["home", "ubuntu", "efs", "videoMAE"]
+  experiment_name: &experiment_name "MPIIGroupInteraction" 
+  run_name: &run_name "videomae_vit_base_patch16_224_kinetic_400_densepose_dual" 
+  experiment_folder_name: &experiment_folder_name [*project_folder, "scripts", *experiment_name]
+  run_folder_name: &run_folder_name [*experiment_folder_name, *run_name]
+
+  output_dir: &output_dir [*run_folder_name, "outputs_eval"]
+  data_path: &data_path [*run_folder_name,"dataset"]
+  data_root: &data_root ["home","ubuntu", "data_local", "MPIIGroupInteraction"]
+  pos_weights_path: &pos_weights_path [*data_path,"weights.json"]
+  model_path: &model_path ["home", "ubuntu", "efs", "videoMAE", "scripts", "MPIIGroupInteraction", "videomae_vit_base_patch16_224_kinetic_400_densepose_dual", "outputs", "checkpoint-best", "mp_rank_00_model_states.pt"]
+
+training_details:
+  num_trainers: &num_trainers 8
+
+torchrun_params:
+  standalone: true
+  nnodes: 1
+  nproc_per_node: *num_trainers
+
+finetuning_params:
+  model: vit_base_patch16_224
+  data_set: dyadic_communication_mpigroup
+  multi_labels: true
+  pos_weight_path: *pos_weights_path
+  nb_classes: 14
+  data_path: *data_path
+  finetune: *model_path
+  log_dir: *output_dir
+  output_dir: *output_dir
+  batch_size: 64
+  num_sample: 2
+  input_size: 224
+  short_side_size: 224
+  save_ckpt_freq: 100
+  num_frames: 16
+  opt: adamw
+  lr: 5e-4
+  opt_betas: [0.9, 0.999]
+  weight_decay: 0.05
+  epochs: 500
+  test_num_segment: 1
+  test_num_crop: 1
+  enable_deepspeed: true
+  mixup: 0
+  cutmix: 0
+  mixup_prob: 0
+  smoothing: 0
+  eval: true
+  data_root: *data_root

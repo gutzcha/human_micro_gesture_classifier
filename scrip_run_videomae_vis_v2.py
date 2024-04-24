@@ -6,6 +6,7 @@ import os.path as osp
 import os
 from glob import glob
 
+# samples_folder = '/home/ubuntu/efs/video_samples'
 samples_folder = '/home/ubuntu/efs/video_samples'
 # Folder structure:
 # dataset name

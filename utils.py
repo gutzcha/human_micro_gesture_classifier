@@ -16,7 +16,11 @@ import torch.distributed as dist
 from torch import inf
 import random
 
-from tensorboardX import SummaryWriter
+try:
+    from tensorboardX import SummaryWriter
+except:
+    Warning('tensorboardX is not installed')
+    SummaryWriter = None
 
 
 class SmoothedValue(object):
@@ -188,11 +192,13 @@ class TensorboardLogger(object):
     def flush(self):
         self.writer.flush()
 
+
 def seed_worker(worker_id):
-    worker_seed = torch.initial_seed() % 2**32
+    worker_seed = torch.initial_seed() % 2 ** 32
     np.random.seed(worker_seed)
     random.seed(worker_seed)
-    
+
+
 def _load_checkpoint_for_ema(model_ema, checkpoint):
     """
     Workaround for ModelEma._load_checkpoint to accept an already-loaded object
@@ -201,6 +207,7 @@ def _load_checkpoint_for_ema(model_ema, checkpoint):
     torch.save(checkpoint, mem_file)
     mem_file.seek(0)
     model_ema._load_checkpoint(mem_file)
+
 
 def setup_for_distributed(is_master):
     """
@@ -378,8 +385,10 @@ def get_grad_norm_(parameters, norm_type: float = 2.0) -> torch.Tensor:
     if norm_type == inf:
         total_norm = max(p.grad.detach().abs().max().to(device) for p in parameters)
     else:
-        total_norm = torch.norm(torch.stack([torch.norm(p.grad.detach(), norm_type).to(device) for p in parameters]), norm_type)
+        total_norm = torch.norm(torch.stack([torch.norm(p.grad.detach(), norm_type).to(device) for p in parameters]),
+                                norm_type)
     return total_norm
+
 
 class EarlyStopper:
     def __init__(self, patience=1, min_delta=0):
@@ -455,7 +464,8 @@ def load_matching_state_dict(model, state_dict):
                 model.state_dict()[key].copy_(value)
             else:
                 # Print a warning for mismatched sizes
-                print(f"Warning: Size mismatch for parameter '{key}': {model.state_dict()[key].size()} in model, {value.size()} in checkpoint. Parameter not loaded.")
+                print(
+                    f"Warning: Size mismatch for parameter '{key}': {model.state_dict()[key].size()} in model, {value.size()} in checkpoint. Parameter not loaded.")
         else:
             # Print a warning for parameters not found in the model
             print(f"Warning: Parameter '{key}' not found in the model. Parameter not loaded.")
@@ -471,7 +481,6 @@ def auto_load_model(args, model, model_without_ddp, optimizer, loss_scaler, mode
         num_decoders = model_without_ddp.decoder.num_decoders
     except:
         num_decoders = 0
-        
 
     if loss_scaler is not None:
         # torch.amp
@@ -494,16 +503,15 @@ def auto_load_model(args, model, model_without_ddp, optimizer, loss_scaler, mode
             else:
                 checkpoint = torch.load(args.resume, map_location='cpu')
 
-
             # if there are missing decoder keys due to using base model, either clone the existing or add a new one
-            
+
             if not all(key in checkpoint['model'] for key in model.state_dict()):
-                print (f'There are missing key in checkpoint, duplicating or initializing new ones')
-                checkpoint['model'] = clone_decoder_weights(num_decoders, 
+                print(f'There are missing key in checkpoint, duplicating or initializing new ones')
+                checkpoint['model'] = clone_decoder_weights(num_decoders,
                                                             checkpoint['model'],
                                                             model=model,
-                                                                clone_flag=clone_decoder)
-                
+                                                            clone_flag=clone_decoder)
+
             model_without_ddp.load_state_dict(checkpoint['model'])
             # load_matching_state_dict(model_without_ddp, checkpoint['module'])
             print("Resume checkpoint %s" % args.resume)
@@ -566,6 +574,7 @@ def create_ds_config(args):
 
         writer.write(json.dumps(ds_config, indent=2))
 
+
 def multiple_samples_collate(batch, fold=False):
     """
     Collate function for repeated augmentation. Each instance in the batch has
@@ -590,6 +599,7 @@ def multiple_samples_collate(batch, fold=False):
     else:
         return inputs, labels, video_idx, extra_data
 
+
 def accuracy_multilabel(output, target, topk=(1,)):
     maxk = max(topk)
     batch_size = target.size(0)
@@ -604,33 +614,32 @@ def accuracy_multilabel(output, target, topk=(1,)):
 
 
 def clone_decoder_weights(n, original_dict, model=None, clone_flag=True):
-
-        # New dictionary to store updated keys and values
+    # New dictionary to store updated keys and values
     new_dict = {}
 
-        # Iterate over original dictionary
-        # The source of the weights for the second decoder can be duplication of checkpoint or random
+    # Iterate over original dictionary
+    # The source of the weights for the second decoder can be duplication of checkpoint or random
     for key, value in original_dict.items():
         # Check if the key contains the word 'decoder.'
         if key.startswith('decoder.'):
-            
+
             # Generate new keys based on the pattern
             new_keys = [(key.replace('decoder.', f'decoder.decoders.{i}.'), i) for i in range(n)]
-            
+
             # Update new dictionary with new keys and cloned values
-            
+
             for new_key, ind in new_keys:
-                if ind == 0 or clone_flag: # allways clone the first decoder weights
+                if ind == 0 or clone_flag:  # allways clone the first decoder weights
                     final_values = value.clone()
-                else: # get the weights from the model, they are randomly initialized 
-                        # #debug
-                        # print('===============================')
-                        # print('===============================')
-                        # print('===============================')
-                        # print('model keys:')
-                        # print('===============================')
-                        # print('===============================')
-                        # print(model.state_dict().keys())
+                else:  # get the weights from the model, they are randomly initialized
+                    # #debug
+                    # print('===============================')
+                    # print('===============================')
+                    # print('===============================')
+                    # print('model keys:')
+                    # print('===============================')
+                    # print('===============================')
+                    # print(model.state_dict().keys())
 
                     final_values = model.state_dict()[f'module.{new_key}'].clone()
                 new_dict[new_key] = final_values
@@ -639,3 +648,24 @@ def clone_decoder_weights(n, original_dict, model=None, clone_flag=True):
             final_values = value.clone()
             new_dict[key] = final_values
     return new_dict
+
+
+def time_function_decorator(func, *args, **kwargs):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(f'Function {func.__name__} took: {(end - start)} seconds to run')
+        return result
+
+    return wrapper
+
+
+@time_function_decorator
+def test_time_function_decorator(t=3):
+    time.sleep(t)
+    return
+
+
+if __name__ == '__main__':
+    test_time_function_decorator(5)
