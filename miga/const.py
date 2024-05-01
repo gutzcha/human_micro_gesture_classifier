@@ -34,3 +34,22 @@ ID2LABELS = {
     32: "illustrative_bls",
     99: "idontknowwhatthisis"
 }
+ID2LABELS_SMG = {
+    1: 'Turtling neck and shoulder',
+    2: 'Rubbing eyes and forehead',
+    3: 'Folding arms',
+    4: 'Touching or covering suprasternal notch',
+    5: 'Moving legs',
+    6: 'Touching or scratching neck',
+    7: 'Folding arms behind body',
+    8: 'Rubbing hands and crossing finger',
+    9: 'Arms akimbo',
+    10: 'Crossing legs',
+    11: 'Scratching some part of body',
+    12: 'Scratching or touching facial parts other than eyes',
+    13: 'Playing or adjusting hair',
+    14: 'Holding arms',
+    15: 'Pulling shirt collar',
+    16: 'Playing with jewelry, and manipulating other objects',
+    17: 'Illustrative hand gestures'
+}

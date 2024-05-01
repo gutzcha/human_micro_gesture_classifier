@@ -58,7 +58,8 @@ class DataAugmentationForVideoMAEInference(DataAugmentationForVideoMAE):
         normalize = GroupNormalize(self.input_mean, self.input_std)
 
         self.transform = transforms.Compose([
-            GroupPadToSquare(),
+            # GroupPadToSquare(),
+            GroupCropToSquare(),
             GroupScale((args.input_size, args.input_size), interpolation=Image.BILINEAR),
             Stack(roll=False),
             ToTorchFormatTensor(div=True),
@@ -198,8 +199,16 @@ def main(args):
 
             # ============ Reconstruct videos ===================
             for feature, output in model_outputs.items():
+                if feature == 'densepose':
+                    normalize_with_orig = False
+                else:
+                    normalize_with_orig = True
                 imgs, rec_img, mask = reconstruct_video_from_patches(ori_img, patch_size, bool_masked_pos,
-                                                                     output['outputs'], frame_id_list)
+                                                                     output['outputs'], frame_id_list,
+                                                                     normalize_with_orig=normalize_with_orig)
+                if feature == 'densepose':
+                    # imgs = unnormalize_frames(imgs)
+                    imgs = rescale_frames(imgs)
                 model_outputs[feature]['imgs'] = imgs
                 model_outputs[feature]['rec_img'] = rec_img
                 model_outputs[feature]['mask'] = mask
@@ -226,7 +235,7 @@ def load_frames(img_path, num_frames, transformations, frame_id_list=None):
 
     # Get 16 frames with 4 sampling rate, this can be more generic by using sampling rate and number of frames
     if frame_id_list is None:
-        frame_id_list = [1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 59]
+        frame_id_list = [1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 52, 53, 54]
 
     video_data = vr.get_batch(frame_id_list).asnumpy()
     img = [Image.fromarray(video_data[vid, :, :, :]).convert('RGB') for vid, _ in enumerate(frame_id_list)]
@@ -241,9 +250,16 @@ def load_frames(img_path, num_frames, transformations, frame_id_list=None):
 
 
 def unnormalize_frames(img, device='cpu'):
-    mean = torch.as_tensor(IMAGENET_DEFAULT_MEAN).to(device)[None, :, None, None, None]
-    std = torch.as_tensor(IMAGENET_DEFAULT_STD).to(device)[None, :, None, None, None]
-    ori_img = img.to(device) * std + mean  # in [0, 1]
+    if isinstance(img, list):
+        mean = np.array(IMAGENET_DEFAULT_MEAN)[None, None, None, :]
+        std = np.array(IMAGENET_DEFAULT_STD)[None, None, None, :]
+        ori_img = np.array(img)
+        ori_img = ori_img * std + mean
+        ori_img = [a for a in ori_img]
+    else:
+        mean = torch.as_tensor(IMAGENET_DEFAULT_MEAN).to(device)[None, :, None, None, None]
+        std = torch.as_tensor(IMAGENET_DEFAULT_STD).to(device)[None, :, None, None, None]
+        ori_img = img.to(device) * std + mean  # in [0, 1]
     return ori_img
 
 
@@ -324,7 +340,7 @@ def reconstruct_video_from_patches(
     img_squeeze = rearrange(ori_img, 'b c (t p0) (h p1) (w p2) -> b (t h w) (p0 p1 p2) c', p0=2, p1=patch_size[0],
                             p2=patch_size[0])
     img_norm = (img_squeeze - img_squeeze.mean(dim=-2, keepdim=True)) / (
-                img_squeeze.var(dim=-2, unbiased=True, keepdim=True).sqrt() + 1e-6)
+            img_squeeze.var(dim=-2, unbiased=True, keepdim=True).sqrt() + 1e-6)
     img_patch = rearrange(img_norm, 'b n p c -> b n (p c)').clone()
 
     if not (bool_masked_pos is None) and torch.any(bool_masked_pos):  # There is a mask
@@ -356,7 +372,19 @@ def reconstruct_video_from_patches(
 
     return imgs, rec_img, mask
 
+def rescale_frames(arr_list):
+    arr = np.array(arr_list)
+    # Reshape the array to (T*H*W, C) to make it easier to normalize each channel
+    reshaped_arr = arr.reshape(-1, arr.shape[-1])
 
+    # Find the minimum and maximum values for each channel across all frames
+    min_values = np.min(reshaped_arr, axis=0)
+    max_values = np.max(reshaped_arr, axis=0)
+
+    # Normalize each channel to be between 0 and 1
+    normalized_arr = (arr - min_values) / (max_values - min_values)
+    normalized_arr_list = [a for a in normalized_arr]
+    return normalized_arr_list
 def save_list_of_images_as_video(image_array_list, output_path, fps):
     # Write the images to an MP4 file
     writer = imageio.get_writer(output_path, fps=fps)

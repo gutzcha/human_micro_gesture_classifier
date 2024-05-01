@@ -11,7 +11,6 @@ from torchvision import transforms
 from rand_augment import rand_augment_transform
 from random_erasing import RandomErasing
 
-
 import numbers
 import PIL
 import torchvision
@@ -19,13 +18,15 @@ import torchvision
 # import functional as FF
 # Get the current directory
 import os
+
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Construct the full path to functional.py
 functional_path = os.path.join(current_directory, 'functional.py')
 
 from importlib.machinery import SourceFileLoader
-FF = SourceFileLoader("functional",functional_path).load_module()
+
+FF = SourceFileLoader("functional", functional_path).load_module()
 
 _pil_interpolation_to_str = {
     Image.NEAREST: "PIL.Image.NEAREST",
@@ -35,7 +36,6 @@ _pil_interpolation_to_str = {
     Image.HAMMING: "PIL.Image.HAMMING",
     Image.BOX: "PIL.Image.BOX",
 }
-
 
 _RANDOM_INTERPOLATION = (Image.BILINEAR, Image.BICUBIC)
 
@@ -52,7 +52,7 @@ def _pil_interp(method):
 
 
 def random_short_side_scale_jitter(
-    images, min_size, max_size, boxes=None, inverse_uniform_sampling=False
+        images, min_size, max_size, boxes=None, inverse_uniform_sampling=False
 ):
     """
     Perform a spatial short scale jittering on the given images and
@@ -83,7 +83,7 @@ def random_short_side_scale_jitter(
     height = images.shape[2]
     width = images.shape[3]
     if (width <= height and width == size) or (
-        height <= width and height == size
+            height <= width and height == size
     ):
         return images, boxes
     new_width = size
@@ -153,8 +153,8 @@ def random_crop(images, size, boxes=None):
     if width > size:
         x_offset = int(np.random.randint(0, width - size))
     cropped = images[
-        :, :, y_offset : y_offset + size, x_offset : x_offset + size
-    ]
+              :, :, y_offset: y_offset + size, x_offset: x_offset + size
+              ]
 
     cropped_boxes = (
         crop_boxes(boxes, x_offset, y_offset) if boxes is not None else None
@@ -251,8 +251,8 @@ def uniform_crop(images, size, spatial_idx, boxes=None, scale_size=None):
         elif spatial_idx == 2:
             x_offset = width - size
     cropped = images[
-        :, :, y_offset : y_offset + size, x_offset : x_offset + size
-    ]
+              :, :, y_offset: y_offset + size, x_offset: x_offset + size
+              ]
     cropped_boxes = (
         crop_boxes(boxes, x_offset, y_offset) if boxes is not None else None
     )
@@ -313,7 +313,7 @@ def grayscale(images):
     # R -> 0.299, G -> 0.587, B -> 0.114.
     img_gray = torch.tensor(images)
     gray_channel = (
-        0.299 * images[:, 2] + 0.587 * images[:, 1] + 0.114 * images[:, 0]
+            0.299 * images[:, 2] + 0.587 * images[:, 1] + 0.114 * images[:, 0]
     )
     img_gray[:, 0] = gray_channel
     img_gray[:, 1] = gray_channel
@@ -477,17 +477,17 @@ def color_normalization(images, mean, stddev):
     """
     if len(images.shape) == 3:
         assert (
-            len(mean) == images.shape[0]
+                len(mean) == images.shape[0]
         ), "channel mean not computed properly"
         assert (
-            len(stddev) == images.shape[0]
+                len(stddev) == images.shape[0]
         ), "channel stddev not computed properly"
     elif len(images.shape) == 4:
         assert (
-            len(mean) == images.shape[1]
+                len(mean) == images.shape[1]
         ), "channel mean not computed properly"
         assert (
-            len(stddev) == images.shape[1]
+                len(stddev) == images.shape[1]
         ), "channel stddev not computed properly"
     else:
         raise NotImplementedError(f"Unsupported dimension {len(images.shape)}")
@@ -507,7 +507,7 @@ def color_normalization(images, mean, stddev):
 
 
 def _get_param_spatial_crop(
-    scale, ratio, height, width, num_repeat=10, log_scale=True, switch_hw=False
+        scale, ratio, height, width, num_repeat=10, log_scale=True, switch_hw=False
 ):
     """
     Given scale, ratio, height and width, return sampled coordinates of the videos.
@@ -549,11 +549,11 @@ def _get_param_spatial_crop(
 
 
 def random_resized_crop(
-    images,
-    target_height,
-    target_width,
-    scale=(0.8, 1.0),
-    ratio=(3.0 / 4.0, 4.0 / 3.0),
+        images,
+        target_height,
+        target_width,
+        scale=(0.8, 1.0),
+        ratio=(3.0 / 4.0, 4.0 / 3.0),
 ):
     """
     Crop the given images to random size and aspect ratio. A crop of random
@@ -574,7 +574,7 @@ def random_resized_crop(
     width = images.shape[3]
 
     i, j, h, w = _get_param_spatial_crop(scale, ratio, height, width)
-    cropped = images[:, :, i : i + h, j : j + w]
+    cropped = images[:, :, i: i + h, j: j + w]
     return torch.nn.functional.interpolate(
         cropped,
         size=(target_height, target_width),
@@ -584,11 +584,11 @@ def random_resized_crop(
 
 
 def random_resized_crop_with_shift(
-    images,
-    target_height,
-    target_width,
-    scale=(0.8, 1.0),
-    ratio=(3.0 / 4.0, 4.0 / 3.0),
+        images,
+        target_height,
+        target_width,
+        scale=(0.8, 1.0),
+        ratio=(3.0 / 4.0, 4.0 / 3.0),
 ):
     """
     This is similar to random_resized_crop. However, it samples two different
@@ -614,12 +614,12 @@ def random_resized_crop_with_shift(
     w_s = [int(i) for i in torch.linspace(w, w_, steps=t).tolist()]
     out = torch.zeros((3, t, target_height, target_width))
     for ind in range(t):
-        out[:, ind : ind + 1, :, :] = torch.nn.functional.interpolate(
+        out[:, ind: ind + 1, :, :] = torch.nn.functional.interpolate(
             images[
-                :,
-                ind : ind + 1,
-                i_s[ind] : i_s[ind] + h_s[ind],
-                j_s[ind] : j_s[ind] + w_s[ind],
+            :,
+            ind: ind + 1,
+            i_s[ind]: i_s[ind] + h_s[ind],
+            j_s[ind]: j_s[ind] + w_s[ind],
             ],
             size=(target_height, target_width),
             mode="bilinear",
@@ -629,9 +629,9 @@ def random_resized_crop_with_shift(
 
 
 def create_random_augment(
-    input_size,
-    auto_augment=None,
-    interpolation="bilinear",
+        input_size,
+        auto_augment=None,
+        interpolation="bilinear",
 ):
     """
     Get video randaug transform.
@@ -665,17 +665,17 @@ def create_random_augment(
 
 
 def random_sized_crop_img(
-    im,
-    size,
-    jitter_scale=(0.08, 1.0),
-    jitter_aspect=(3.0 / 4.0, 4.0 / 3.0),
-    max_iter=10,
+        im,
+        size,
+        jitter_scale=(0.08, 1.0),
+        jitter_aspect=(3.0 / 4.0, 4.0 / 3.0),
+        max_iter=10,
 ):
     """
     Performs Inception-style cropping (used for training).
     """
     assert (
-        len(im.shape) == 3
+            len(im.shape) == 3
     ), "Currently only support image for random_sized_crop"
     h, w = im.shape[1:3]
     i, j, h, w = _get_param_spatial_crop(
@@ -687,7 +687,7 @@ def random_sized_crop_img(
         log_scale=False,
         switch_hw=True,
     )
-    cropped = im[:, i : i + h, j : j + w]
+    cropped = im[:, i: i + h, j: j + w]
     return torch.nn.functional.interpolate(
         cropped.unsqueeze(0),
         size=(size, size),
@@ -713,11 +713,11 @@ class RandomResizedCropAndInterpolation:
     """
 
     def __init__(
-        self,
-        size,
-        scale=(0.08, 1.0),
-        ratio=(3.0 / 4.0, 4.0 / 3.0),
-        interpolation="bilinear",
+            self,
+            size,
+            scale=(0.08, 1.0),
+            ratio=(3.0 / 4.0, 4.0 / 3.0),
+            interpolation="bilinear",
     ):
         if isinstance(size, tuple):
             self.size = size
@@ -807,22 +807,22 @@ class RandomResizedCropAndInterpolation:
 
 
 def transforms_imagenet_train(
-    img_size=224,
-    scale=None,
-    ratio=None,
-    hflip=0.5,
-    vflip=0.0,
-    color_jitter=0.4,
-    auto_augment=None,
-    interpolation="random",
-    use_prefetcher=False,
-    mean=(0.485, 0.456, 0.406),
-    std=(0.229, 0.224, 0.225),
-    re_prob=0.0,
-    re_mode="const",
-    re_count=1,
-    re_num_splits=0,
-    separate=False,
+        img_size=224,
+        scale=None,
+        ratio=None,
+        hflip=0.5,
+        vflip=0.0,
+        color_jitter=0.4,
+        auto_augment=None,
+        interpolation="random",
+        use_prefetcher=False,
+        mean=(0.485, 0.456, 0.406),
+        std=(0.229, 0.224, 0.225),
+        re_prob=0.0,
+        re_mode="const",
+        re_count=1,
+        re_num_splits=0,
+        separate=False,
 ):
     """
     If separate==True, the transforms are returned as a tuple of 3 separate transforms
@@ -906,6 +906,7 @@ def transforms_imagenet_train(
     else:
         return transforms.Compose(primary_tfl + secondary_tfl + final_tfl)
 
+
 ############################################################################################################
 ############################################################################################################
 
@@ -981,16 +982,12 @@ class RandomResize(object):
         return resized
 
 
-class PadToSquare(object):
-    """ Pads frame to make them sqaure shaped (width = height)
-    """
-    def __init__ (self, pad_value=0):
-        self.pad_value = pad_value
-
+class CropToSquare(object):
+    def __init__(self):
+        pass
 
     def __call__(self, image_array):
-        pad_value = self.pad_value
-        
+
         # Determine the size difference between width and height
         single_image = image_array[0]
         if isinstance(single_image, np.ndarray):
@@ -999,14 +996,48 @@ class PadToSquare(object):
             width, height = single_image.size
         else:
             raise TypeError('Expected numpy.ndarray or PIL.Image' +
-                        'but got list of {0}'.format(type(single_image)))
-
+                            'but got list of {0}'.format(type(single_image)))
 
         if height == width:
             # Image is already square
             padded_image = image_array.copy()
             return padded_image
+        # Calculate the size of the square
+        size = min(width, height)
 
+        # Calculate the starting coordinates for cropping
+        x1 = (width - size) // 2
+        y1 = (height - size) // 2
+
+        # Crop the clip from the center to make it square
+        cropped_clip = FF.crop_clip(image_array, y1, x1, size, size)
+
+        return cropped_clip
+
+
+class PadToSquare(object):
+    """ Pads frame to make them sqaure shaped (width = height)
+    """
+
+    def __init__(self, pad_value=0):
+        self.pad_value = pad_value
+
+    def __call__(self, image_array):
+        pad_value = self.pad_value
+
+        # Determine the size difference between width and height
+        single_image = image_array[0]
+        if isinstance(single_image, np.ndarray):
+            height, width, _ = single_image.shape
+        elif isinstance(single_image, PIL.Image.Image):
+            width, height = single_image.size
+        else:
+            raise TypeError('Expected numpy.ndarray or PIL.Image' +
+                            'but got list of {0}'.format(type(single_image)))
+
+        if height == width:
+            # Image is already square
+            return image_array.copy()
 
         size_diff = abs(width - height)
 
@@ -1016,17 +1047,17 @@ class PadToSquare(object):
             pad_bottom = size_diff - pad_top
             pad_left = 0
             pad_right = 0
-            
-        elif height > width:
+
+        else:
             pad_left = size_diff // 2
             pad_right = size_diff - pad_left
             pad_bottom = 0
-            pad_top = 0       
-        
-        padded_image = FF.pad_clip(image_array, pad_top, pad_bottom,pad_left,pad_right, pad_value)
-        
+            pad_top = 0
+
+        padded_image = FF.pad_clip(image_array, pad_top, pad_bottom, pad_left, pad_right, pad_value)
 
         return padded_image
+
 
 class Resize(object):
     """Resizes a list of (H x W x C) numpy.ndarray to the final size

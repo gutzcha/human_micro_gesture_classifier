@@ -661,6 +661,48 @@ def time_function_decorator(func, *args, **kwargs):
     return wrapper
 
 
+import os
+import cv2
+
+def split_videos(folder_path, video_length = 2):
+    # Iterate over all files in the folder
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".mp4"):  # Assuming all videos are in mp4 format
+            file_path = os.path.join(folder_path, filename)
+            # Open the video file
+            cap = cv2.VideoCapture(file_path)
+            # Get video properties
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            # Calculate frame duration in milliseconds
+            frame_duration_ms = int(1000 / fps)
+            # Create output folder
+            output_folder = os.path.join(folder_path, os.path.splitext(filename)[0])
+            os.makedirs(output_folder, exist_ok=True)
+            # Read and save 2-second segments
+            segment_num = 0
+            while cap.isOpened():
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                # Calculate start and end frame indices for the segment
+                start_frame = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
+                end_frame = min(start_frame + fps * video_length, total_frames)
+                # Save the segment
+                output_filename = f"{filename.split('.')[0]}_{segment_num}.mp4"
+                output_path = os.path.join(output_folder, output_filename)
+                out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
+                for _ in range(start_frame, end_frame):
+                    out.write(frame)
+                out.release()
+                segment_num += 1
+                # Move to the start of the next segment
+                cap.set(cv2.CAP_PROP_POS_FRAMES, end_frame)
+            cap.release()
+
+
 @time_function_decorator
 def test_time_function_decorator(t=3):
     time.sleep(t)

@@ -7,6 +7,7 @@ import torchvision
 from PIL import Image, ImageOps
 import numbers
 from video_transforms import PadToSquare as pad2square
+from video_transforms import CropToSquare as crop2square
 
 
 class GroupRandomCrop(object):
@@ -46,6 +47,14 @@ class GroupCenterCrop(object):
         return ([self.worker(img) for img in img_group], label)
 
 
+class GroupCropToSquare():
+    def __init__(self):
+        self.worker = crop2square()
+
+    def __call__(self, tensor_tuple):
+        tensor, label = tensor_tuple
+        cropped_tensor = self.worker(tensor)
+        return (cropped_tensor, label)
 class GroupPadToSquare(object):
     def __init__(self):
         self.worker = pad2square()

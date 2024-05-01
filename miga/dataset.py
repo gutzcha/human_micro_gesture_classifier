@@ -54,15 +54,15 @@ class Miga(Dataset):
         dataset_samples = list(df['filenames'].values)
         if self.data_root is not None:
             if mode == 'train':
-                sub_folder = 'clips_train'
+                sub_folder = 'smg_rgb_train'
             elif mode == 'validation':
-                sub_folder = 'clips_val'
+                sub_folder = 'smg_rgb_validate'
             elif mode == 'test':
                 # test can be val in disguise
                 if anno_path.endswith('val.csv'):
-                    sub_folder = 'clips_val'
+                    sub_folder = 'smg_rgb_validate'
                 else:
-                    sub_folder = 'clips_test'
+                    sub_folder = 'smg_rgb_test'
             data_folder = os.path.join(self.data_root, sub_folder)
             dataset_samples = [os.path.join(data_folder, a) for a in dataset_samples]
         self.dataset_samples = dataset_samples
@@ -77,16 +77,18 @@ class Miga(Dataset):
 
         elif (mode == 'validation'):
             self.data_transform = video_transforms.Compose([
-                video_transforms.PadToSquare(),
+                video_transforms.CropToSquare(),
+                # video_transforms.PadToSquare(),
                 video_transforms.Resize(self.short_side_size, interpolation='bilinear'),
-                video_transforms.CenterCrop(size=(self.crop_size, self.crop_size)),
+                # video_transforms.CenterCrop(size=(self.crop_size, self.crop_size)),
                 volume_transforms.ClipToTensor(),
                 video_transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                            std=[0.229, 0.224, 0.225])
             ])
         elif mode == 'test':
             self.data_resize = video_transforms.Compose([
-                video_transforms.PadToSquare(),
+                video_transforms.CropToSquare(),
+                # video_transforms.PadToSquare(),
                 video_transforms.Resize(size=(short_side_size), interpolation='bilinear')
             ])
             self.data_transform = video_transforms.Compose([
@@ -113,7 +115,10 @@ class Miga(Dataset):
             sample = self.dataset_samples[index]
             view = self.view_list[index]
             metadata = self.metadata_array[index]
-            buffer = self.loadvideo_decord(sample, sample_rate_scale=scale_t)  # T H W C
+            start_ind = self.start_inds[index]
+            end_ind = self.end_inds[index]
+
+            buffer = self.loadvideo_decord(sample,ind_range=(start_ind, end_ind) ,sample_rate_scale=scale_t)  # T H W C
             if len(buffer) == 0:
                 while len(buffer) == 0:
                     warnings.warn("video {} not correctly loaded during training".format(sample))
@@ -271,7 +276,7 @@ class Miga(Dataset):
 
         return buffer
 
-    def loadvideo_decord(self, sample, sample_rate_scale=1):
+    def loadvideo_decord(self, sample, ind_range=None, sample_rate_scale=1):
         """Load video content using Decord"""
         fname = sample
 
@@ -292,34 +297,39 @@ class Miga(Dataset):
             print("video cannot be loaded by decord: ", fname)
             return []
 
-        if self.mode == 'test':
-            all_index = []
-            tick = len(vr) / float(self.num_segment)
-            all_index = list(np.array([int(tick / 2.0 + tick * x) for x in range(self.num_segment)] +
-                                      [int(tick * x) for x in range(self.num_segment)]))
-            while len(all_index) < (self.num_segment * self.test_num_segment):
-                all_index.append(all_index[-1])
-            all_index = list(np.sort(np.array(all_index)))
-            vr.seek(0)
-            buffer = vr.get_batch(all_index).asnumpy()
-            return buffer
-
-        # handle temporal segments
-        average_duration = len(vr) // self.num_segment
-        all_index = []
-        if average_duration > 0:
-            all_index += list(
-                np.multiply(list(range(self.num_segment)), average_duration) + np.random.randint(average_duration,
-                                                                                                 size=self.num_segment))
-        elif len(vr) > self.num_segment:
-            all_index += list(np.sort(np.random.randint(len(vr), size=self.num_segment)))
+        if ind_range is not None:
+            start_ind, end_ind = ind_range
         else:
-            all_index += list(np.zeros((self.num_segment,)))
+            start_ind , end_ind = 0, len(vr)
+        #TODO: Fix the test dataset
+        # if self.mode == 'test':
+        #     all_index = []
+        #     tick = len(vr) / float(self.num_segment)
+        #     all_index = list(np.array([int(tick / 2.0 + tick * x) for x in range(self.num_segment)] +
+        #                               [int(tick * x) for x in range(self.num_segment)]))
+        #     while len(all_index) < (self.num_segment * self.test_num_segment):
+        #         all_index.append(all_index[-1])
+        #     all_index = list(np.sort(np.array(all_index)))
+        #     vr.seek(0)
+        #     buffer = vr.get_batch(all_index).asnumpy()
+        #     return buffer
+
+        # handle temporal segmentation
+        average_duration = (end_ind - start_ind) // self.num_segment
+        all_index = []
+
+        if average_duration > 0:
+            all_index += [start_ind + i * average_duration + np.random.randint(average_duration) for i in
+                          range(self.num_segment)]
+        elif len(vr) > self.num_segment:
+            all_index += list(np.sort(np.random.randint(start_ind, end_ind, size=self.num_segment)))
+        else:
+            all_index += [start_ind] * self.num_segment
+
         all_index = list(np.array(all_index))
         vr.seek(0)
         buffer = vr.get_batch(all_index).asnumpy()
         return buffer
-
     def __len__(self):
         if self.mode != 'test':
             return len(self.dataset_samples)
