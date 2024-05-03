@@ -24,7 +24,7 @@ import utils
 import modeling_finetune
 
 
-def get_args():
+def get_args(**kwargs):
     parser = argparse.ArgumentParser('VideoMAE fine-tuning and evaluation script for video classification', add_help=False)
 
 
@@ -483,13 +483,9 @@ def main(args, ds_init):
         args.weight_decay, args.weight_decay_end, args.epochs, num_training_steps_per_epoch)
     print("Max WD = %.7f, Min WD = %.7f" % (max(wd_schedule_values), min(wd_schedule_values)))
 
-    if mixup_fn is not None:
-        # smoothing is handled with mixup label transform
-        criterion = SoftTargetCrossEntropy()
-    elif args.smoothing > 0.:
-        criterion = LabelSmoothingCrossEntropy(smoothing=args.smoothing)
-    elif args.multi_labels:
-        # Load JSON data from file
+    # load positive weights
+    if 'pos_weight_path' in args and args.pos_weight_path is not None:
+
         try:
             with open(args.pos_weight_path, 'r') as json_file:
                 positive_weights_dict = json.load(json_file)
@@ -501,10 +497,18 @@ def main(args, ds_init):
             # Handle the exception
             print(f"Warning: Unable to load JSON file. Error: {e}")
             positive_weights = None
+    else:
+        positive_weights = None
 
+    if mixup_fn is not None:
+        # smoothing is handled with mixup label transform
+        criterion = SoftTargetCrossEntropy()
+    elif args.smoothing > 0.:
+        criterion = LabelSmoothingCrossEntropy(smoothing=args.smoothing)
+    elif args.multi_labels:
         criterion = torch.nn.BCEWithLogitsLoss(pos_weight=positive_weights)
     else:
-        criterion = torch.nn.CrossEntropyLoss()
+        criterion = torch.nn.CrossEntropyLoss(weight=positive_weights)
 
     print("criterion = %s" % str(criterion))
 

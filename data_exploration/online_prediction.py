@@ -121,6 +121,7 @@ if __name__ == "__main__":
     config_path = osp.join('..', 'model_configs', 'mpigroup_multiclass_inference_debug.yaml')
     args = get_args(config_path)
     inference_object = ModelInference(args)
-    path_to_video = "D:\\Project-mpg microgesture\\imigue\\0001.mp4"
+    # path_to_video = "D:\\Project-mpg microgesture\\imigue\\0001.mp4"
+    path_to_video = None
     pipeline = VideoPipeline(overlap_size=8, cycle_time=1, inference_function=inference_object.run_inference)
     pipeline.capture_video(source=path_to_video)

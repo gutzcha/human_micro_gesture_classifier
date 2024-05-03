@@ -44,19 +44,27 @@ def pars_path(p: Union[str, List[Union[List, str]]]):
     return os.path.join(*components)
 
 
-def get_args(yaml_path):
+def get_args(yaml_path, params='finetuning_params'):
     # load yaml
     loaded_config = yaml.safe_load(open(yaml_path, 'r'))
-    finetuning_params = loaded_config['finetuning_params']
+    if params is None:
+        params = loaded_config.keys()
+    elif isinstance(params, str):
+        params = [params]
+    all_params = dict()
+    for param in params:
+        ext_params = loaded_config[param]
 
-    for k, v in finetuning_params.items():
-        if isinstance(v, list):
-            if isinstance(v[0], float):
-                continue
-            v = pars_path(v)
-        finetuning_params[k] = v
-
-    return Namespace(**finetuning_params)
+        for k, v in ext_params.items():
+            if k =='lr':
+                pass
+            if isinstance(v, list):
+                if isinstance(v[0], float):
+                    continue
+                v = pars_path(v)
+            ext_params[k] = v
+        all_params.update(ext_params)
+    return Namespace(**all_params), all_params
 
 
 
@@ -134,7 +142,7 @@ class ModelInference:
 
 if __name__ == '__main__':
     config_path = osp.join('..', 'model_configs', 'mpigroup_multiclass_inference_debug.yaml')
-    args = get_args(config_path)
+    args, _ = get_args(config_path)
     model = ModelInference(args)
 
     path_to_video = "D:\\Project-mpg microgesture\\human_micro_gesture_classifier\\video_samples_results\\MPIG_densepose_dual_2\\checkpoint-99\\MPIIGroupInteraction\clips_train\\00000-video\\videos\\ori_vid.mp4"

@@ -164,7 +164,7 @@ def build_dataset(is_train, test_mode, args, anno_path=None):
             new_height=224,
             new_width=224,
             args=args)
-        nb_classes = 15
+        nb_classes = args.nb_classes
 
     elif args.data_set == 'dyadic_communication_mpigroup':
         mode = None
@@ -204,7 +204,7 @@ def build_dataset(is_train, test_mode, args, anno_path=None):
             view_crop_mapping=mpigroup_cropping_map,
             corner_crop_size=1000,
             args=args)
-        nb_classes = 14
+        nb_classes = args.nb_classes
 
     elif args.data_set == 'UCF101':
         mode = None

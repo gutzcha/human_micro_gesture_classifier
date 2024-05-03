@@ -32,5 +32,5 @@ OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=8 \
     --test_num_segment 2 \
     --test_num_crop 3 \
     --dist_eval \
-    --enable_deepspeed 
+#    --enable_deepspeed
 

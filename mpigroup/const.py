@@ -5,6 +5,7 @@ cropping_map = {
     'front2': 'tl',
     'right': 'bl',
     'left': 'br',
+    'center': 'mm',
 }
 
 LABELS = {

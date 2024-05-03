@@ -53,16 +53,19 @@ class DyadicvideoClsDataset(Dataset):
             df = self.anno_path
         dataset_samples = list(df['filenames'].values)
         if self.data_root is not None:
-            if mode == 'train':
-                sub_folder='clips_train'
-            elif mode == 'validation':
-                sub_folder='clips_val'
-            elif mode == 'test':
-                # test can be val in disguise
-                if anno_path.endswith('val.csv'):
+            if 'folder_name' in df.columns:
+                sub_folder = df['folder_name'].values[0]
+            else: # default
+                if mode == 'train':
+                    sub_folder='clips_train'
+                elif mode == 'validation':
                     sub_folder='clips_val'
-                else:
-                    sub_folder='clips_test'
+                elif mode == 'test':
+                    # test can be val in disguise
+                    if anno_path.endswith('val.csv'):
+                        sub_folder='clips_val'
+                    else:
+                        sub_folder='clips_test'
             data_folder = os.path.join(self.data_root,sub_folder)
             dataset_samples = [os.path.join(data_folder, a) for  a in dataset_samples]
         self.dataset_samples = dataset_samples
@@ -76,7 +79,7 @@ class DyadicvideoClsDataset(Dataset):
 
         elif (mode == 'validation'):
             self.data_transform = video_transforms.Compose([
-                video_transforms.PadToSquare(),
+                # video_transforms.PadToSquare(),
                 video_transforms.Resize(self.short_side_size, interpolation='bilinear'),
                 video_transforms.CenterCrop(size=(self.crop_size, self.crop_size)),
                 volume_transforms.ClipToTensor(),
@@ -85,7 +88,7 @@ class DyadicvideoClsDataset(Dataset):
             ])
         elif mode == 'test':
             self.data_resize = video_transforms.Compose([
-                video_transforms.PadToSquare(),
+                # video_transforms.PadToSquare(),
                 video_transforms.Resize(size=(short_side_size), interpolation='bilinear')
             ])
             self.data_transform = video_transforms.Compose([
@@ -122,7 +125,7 @@ class DyadicvideoClsDataset(Dataset):
                     buffer = self.loadvideo_decord(sample, sample_rate_scale=scale_t)
 
             # crop corner
-            if self.corner_crop_size is not None and self.view_crop_mapping is not None:
+            if self.view_crop_mapping is not None:
                 buffer = crop_corner(buffer, self.corner_crop_size, self.view_crop_mapping[view])
 
             if args.num_sample > 1:
@@ -156,7 +159,7 @@ class DyadicvideoClsDataset(Dataset):
                     buffer = self.loadvideo_decord(sample)
             
             # crop corner
-            if self.corner_crop_size is not None and self.view_crop_mapping is not None:
+            if self.view_crop_mapping is not None:
                 buffer = crop_corner(buffer, self.corner_crop_size, self.view_crop_mapping[view])
 
             buffer = self.data_transform(buffer)
@@ -181,7 +184,7 @@ class DyadicvideoClsDataset(Dataset):
                 buffer = self.loadvideo_decord(sample)
                 
             # crop corner
-            if self.corner_crop_size is not None and self.view_crop_mapping is not None:
+            if self.view_crop_mapping is not None:
                 buffer = crop_corner(buffer, self.corner_crop_size, self.view_crop_mapping[view])
 
             buffer = self.data_resize(buffer)
@@ -333,22 +336,36 @@ def crop_corner(frames, crop_size, corner):
         frames (tensor): frames of images sampled from the video. The
             dimension is `num frames` x `height` x `width` x `channel`.
         crop_size (int): the size of height and width used to crop the
-            frames.
+            frames. if None, then max min of height and width will be used
         corner (str): corner to crop the frames. Valid values are 'tl' (top left),
-            'tr' (top right), 'bl' (bottom left), and 'br' (bottom right).
+            'tr' (top right), 'bl' (bottom left), and 'br' (bottom right), and 'mm' (middle point)
     Returns:
         frames (tensor): spatially cropped frames.
     """
-    assert corner in ['tl', 'tr', 'bl', 'br']
-    assert crop_size <= frames.shape[1] and crop_size <= frames.shape[2], "Crop size must be smaller than the dimensions of the frames."
+    assert corner in ['tl', 'tr', 'bl', 'br', 'mm']
+    _ , height, width, _ = frames.shape
+    if crop_size is None:
+        crop_size = min([height, width])
+    assert crop_size <= height and crop_size <= width, "Crop size must be smaller than the dimensions of the frames."
     if corner == 'bl':
         frames = frames[:, -crop_size:, :crop_size, :]
     elif corner == 'tr':
         frames = frames[:, :crop_size, -crop_size:, :]
     elif corner == 'br':
         frames = frames[:, -crop_size:, -crop_size:, :]
-    else:  # corner == 'tl'
+    elif corner == 'tl':
         frames = frames[:, :crop_size, :crop_size, :]
+    else: # cornet == 'mm'
+        crop_height = crop_width = crop_size
+
+        # Calculate crop boundaries
+        start_y = (height - crop_height) // 2
+        end_y = start_y + crop_height
+        start_x = (width - crop_width) // 2
+        end_x = start_x + crop_width
+
+        frames = frames[:, start_y:end_y, start_x:end_x, :]
+
     return frames
 
 def spatial_sampling(
