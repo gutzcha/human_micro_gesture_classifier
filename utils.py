@@ -662,7 +662,10 @@ def time_function_decorator(func, *args, **kwargs):
 
 
 import os
-import cv2
+try:
+    import cv2
+except:
+    pass
 
 def split_videos(folder_path, video_length = 2):
     # Iterate over all files in the folder
