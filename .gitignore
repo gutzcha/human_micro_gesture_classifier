@@ -33,6 +33,9 @@
 #*.log
 *.txt
 *.csv
+!train.csv
+!val.csv
+!test.csv
 
 # Ignore compiled Python files
 *.pyc
