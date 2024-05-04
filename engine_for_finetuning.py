@@ -33,7 +33,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                     device: torch.device, epoch: int, loss_scaler, max_norm: float = 0,
                     model_ema: Optional[ModelEma] = None, mixup_fn: Optional[Mixup] = None, log_writer=None,
                     start_steps=None, lr_schedule_values=None, wd_schedule_values=None,
-                    num_training_steps_per_epoch=None, update_freq=None):
+                    num_training_steps_per_epoch=None, update_freq=None, is_one_hot=False):
     model.train(True)
     is_multilabel = isinstance(criterion,torch.nn.modules.loss.BCEWithLogitsLoss)
     metric_logger = utils.MetricLogger(delimiter="  ")
@@ -64,7 +64,8 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                     param_group["weight_decay"] = wd_schedule_values[it]
 
         samples = samples.to(device, non_blocking=True)
-        targets = targets.to(device, non_blocking=True).float()
+        # targets = targets.to(device, non_blocking=True).float()
+        targets = targets.type(torch.LongTensor).to(device, non_blocking=True)
 
         if mixup_fn is not None:
             samples, targets = mixup_fn(samples, targets)

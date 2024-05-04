@@ -21,7 +21,7 @@ from engine_for_finetuning import train_one_epoch, validation_one_epoch, final_t
 from utils import NativeScalerWithGradNormCount as NativeScaler
 from utils import  multiple_samples_collate
 import utils
-import modeling_finetune
+# import modeling_finetune
 
 
 def get_args(**kwargs):
@@ -30,6 +30,7 @@ def get_args(**kwargs):
 
     #multilabel weights
     parser.add_argument('--multi_labels', action='store_true', default=False, help='Use multi-lable loss')
+    parser.add_argument('--one_hot_labels', action='store_true', default=False, help='labels are onehot encoded')
     parser.add_argument('--pos_weight_path', default='', type=str,
                         help='path to weights json file path')
 
@@ -484,7 +485,7 @@ def main(args, ds_init):
     print("Max WD = %.7f, Min WD = %.7f" % (max(wd_schedule_values), min(wd_schedule_values)))
 
     # load positive weights
-    if 'pos_weight_path' in args and args.pos_weight_path is not None:
+    if hasattr(args, "pos_weight_path") and args.pos_weight_path is not None:
 
         try:
             with open(args.pos_weight_path, 'r') as json_file:

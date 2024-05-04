@@ -39,6 +39,9 @@ class DyadicvideoClsDataset(Dataset):
         self.view_crop_mapping = view_crop_mapping
         self.corner_crop_size = corner_crop_size
         self.data_root = data_root
+        self.is_multi_labels = args.multi_labels
+        self.is_one_hot_labels = args.one_hot_labels
+
         if self.mode in ['train']:
             self.aug = True
             if self.args.reprob > 0:
@@ -70,6 +73,12 @@ class DyadicvideoClsDataset(Dataset):
             dataset_samples = [os.path.join(data_folder, a) for  a in dataset_samples]
         self.dataset_samples = dataset_samples
         self.label_array = list(df['labels'].apply(lambda x: np.array(ast.literal_eval(re.sub(r'[,\s]+', ',', x)))))
+
+        # if not is_multi and is_one_hot convert to index
+        if not self.is_multi_labels and self.is_one_hot_labels:
+            self.label_array = [np.argmax(a) for a in self.label_array]
+
+
         self.metadata_array = list(df['metadata'].apply(lambda x: np.array(ast.literal_eval(x)))) # convert to list of dicts with metadata
         self.view_list = list(df['view'].values)
         self.data_root = data_root
