@@ -18,11 +18,11 @@ POS_WEIGHTS_PATH="${DATA_PATH}\weights.json"
 NUM_TRAINERS=1
 MODEL_PATH="D:\Project-mpg microgesture\pretrained\pretrained\MPIIGroupInteraction\k400_finetune_videomae_pretrain_dual_2_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100\checkpoint-99.pth"
 
-torchrun \
-  --standalone \
-    --nnodes=1 \
-    --nproc-per-node=$NUM_TRAINERS \
-    --run_class_finetuning.py \
+#torchrun \
+#  --standalone \
+#    --nnodes=1 \
+#    --nproc-per-node=$NUM_TRAINERS \
+C:\\Users\\user\\anaconda3\\envs\\micro\\python run_class_finetuning.py \
     --model vit_base_patch16_224 \
     --data_set dyadic_communication_mpigroup \
     --pos_weight_path "${POS_WEIGHTS_PATH}"\

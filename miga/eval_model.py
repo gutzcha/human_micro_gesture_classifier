@@ -1,15 +1,27 @@
 from types import SimpleNamespace as Namespace
 
 import sys
+
+
+import os
 import os.path as osp
 sys.path.append(osp.dirname(osp.dirname(osp.abspath(__file__))))
+#
+# # Get the current script's directory
+# current_dir = osp.dirname(osp.realpath(__file__))
+#
+# # Navigate two levels up to get the root folder
+# root_folder = osp.abspath(osp.join(current_dir, '..', '..','..'))
+#
+# # Add the root folder to the Python path
+# sys.path.append(root_folder)
+#
 from run_class_finetuning import main
-
 
 
 args = Namespace(multi_labels=False,
                  pos_weight_path='D:\\Project-mpg microgesture\\human_micro_gesture_classifier\\scripts\\miga_smg\\videomae_vit_base_patch16_224_kinetic_400_densepose_dual_resample\\dataset\\weights.json',
-                 batch_size=1, epochs=10, update_freq=1, save_ckpt_freq=1, model='vit_base_patch16_224',
+                 batch_size=2, epochs=10, update_freq=1, save_ckpt_freq=1, model='vit_base_patch16_224',
                  tubelet_size=2, input_size=224, fc_drop_rate=0.0, drop=0.0, attn_drop_rate=0.0,
                  drop_path=0.1, disable_eval_during_finetuning=False,
                  model_ema=False, model_ema_decay=0.9999,
@@ -18,26 +30,27 @@ args = Namespace(multi_labels=False,
                  clip_grad=None, momentum=0.9,
                  weight_decay=0.05, weight_decay_end=None,
                  lr=0.0005, layer_decay=0.75,
-                 warmup_lr=1e-05, min_lr=1e-06,
-                 warmup_epochs=1, warmup_steps=-1,                 color_jitter=0.4, num_sample=2,
-                 aa='rand-m7-n4-mstd0.5-inc1', smoothing=0.1,
+                 warmup_lr=1e-06, min_lr=1e-06,
+                 warmup_epochs=1, warmup_steps=-1,
+                 color_jitter=0.4, num_sample=2,
+                 aa='rand-m7-n4-mstd0.5-inc1', smoothing=0.0,
                  train_interpolation='bicubic', crop_pct=None,
                  short_side_size=224, test_num_segment=1, test_num_crop=1, reprob=0.25, remode='pixel',
-                 recount=1, resplit=False, mixup=0.1, cutmix=0.2, cutmix_minmax=None, mixup_prob=0.2,
+                 recount=1, resplit=False, mixup=0.0, cutmix=0.0, cutmix_minmax=None, mixup_prob=0.0,
                  mixup_switch_prob=0.5, mixup_mode='batch',
-                 finetune='D:\\Project-mpg microgesture\\pretrained\\pretrained\\MPIIGroupInteraction\\k400_finetune_videomae_pretrain_dual_2_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100\\checkpoint-99.pth',
+                 finetune=r'D:\Project-mpg microgesture\human_micro_gesture_classifier\scripts\miga_smg\videomae_vit_base_patch16_224_kinetic_400_densepose_dual_resample\outputs\checkpoint-0.pth',
                  model_key='model|module', model_prefix='',
                  init_scale=0.001, use_checkpoint=False, use_mean_pooling=True,
                  data_path='D:\\Project-mpg microgesture\\human_micro_gesture_classifier\\scripts\\miga_smg\\videomae_vit_base_patch16_224_kinetic_400_densepose_dual_resample\\dataset',
                  eval_data_path=None, nb_classes=17, imagenet_default_mean_and_std=True,
                  num_segments=1, num_frames=16, sampling_rate=4,
                  data_set='dyadic_communication_mpigroup',
-                 output_dir='D:\\Project-mpg microgesture\\human_micro_gesture_classifier\\scripts\\miga_smg\\videomae_vit_base_patch16_224_kinetic_400_densepose_dual_resample\\outputs',
+                 output_dir='D:\\Project-mpg microgesture\\human_micro_gesture_classifier\\scripts\\miga_smg\\videomae_vit_base_patch16_224_kinetic_400_densepose_dual_resample\\outputs_eval',
                  data_root='D:\\Project-mpg microgesture\\smg\\smg_split_files',
-                 log_dir='D:\\Project-mpg microgesture\\human_micro_gesture_classifier\\scripts\\miga_smg\\videomae_vit_base_patch16_224_kinetic_400_densepose_dual_resample\\outputs',
-                 device='cuda', seed=0, resume='', auto_resume=True, save_ckpt=True, start_epoch=0, eval=False,
+                 log_dir='D:\\Project-mpg microgesture\\human_micro_gesture_classifier\\scripts\\miga_smg\\videomae_vit_base_patch16_224_kinetic_400_densepose_dual_resample\\outputs_eval',
+                 device='cuda', seed=0, resume='', auto_resume=True, save_ckpt=True, start_epoch=0, eval=True,
                  dist_eval=True, num_workers=10, pin_mem=True, world_size=1, local_rank=-1, dist_on_itp=False,
-                 dist_url='env://', enable_deepspeed=False, distributed=False, one_hot_labels=True, limit_data=False)
+                 dist_url='env://', enable_deepspeed=False, distributed=False, one_hot_labels=True, limit_data=None)
 
 if __name__ == '__main__':
     main(args, None)

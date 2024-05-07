@@ -203,6 +203,7 @@ def build_dataset(is_train, test_mode, args, anno_path=None):
             new_width=224,
             view_crop_mapping=mpigroup_cropping_map,
             corner_crop_size=1000,
+            limit_data=args.limit_data,
             args=args)
         nb_classes = args.nb_classes
 

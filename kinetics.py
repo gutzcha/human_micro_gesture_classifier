@@ -11,6 +11,7 @@ from decord import VideoReader, cpu
 from torch.utils.data import Dataset
 import video_transforms as video_transforms 
 import volume_transforms as volume_transforms
+import pandas as pd
 
 class VideoClsDataset(Dataset):
     """Load your own video classification dataset."""
@@ -659,8 +660,13 @@ class VideoMAE2VID(torch.utils.data.Dataset):
         filebasename = self.clips[index]
         # TODO fix feature names: change it to feature_cfg
         # expecting to get a basename without extention and features
-        video_names= [os.path.join(self.root,values['folder'] , 
-                                   f"{filebasename}.{values['file_extention']}") for featurename, values in self.features_cfg.items()]
+        if self.features_cfg is not None:
+            video_names= [os.path.join(self.root,values['folder'] ,
+                                       f"{filebasename}.{values['file_extention']}") for featurename, values in self.features_cfg.items()]
+        else:
+            video_names = [os.path.join(self.root, filebasename)]
+
+
         decord_vrs = []
         for video_name in video_names:
             try:
@@ -706,7 +712,10 @@ class VideoMAE2VID(torch.utils.data.Dataset):
                 
         
         process_data, mask = self.transform((images, None)) # T*C*features,H,W
-        separated_tensors = torch.chunk(process_data, len(self.features_cfg), dim=0)
+        if self.features_cfg is not None:
+            separated_tensors = torch.chunk(process_data, len(self.features_cfg), dim=0)
+        else:
+            separated_tensors = process_data[None, ...]
         process_data = [process_data.view((self.new_length, 3) + process_data.size()[-2:]).transpose(0,1) for process_data in separated_tensors]  # T*C,H,W -> T,C,H,W -> C,T,H,W
    
         return (process_data, mask)
@@ -718,17 +727,20 @@ class VideoMAE2VID(torch.utils.data.Dataset):
         if not os.path.exists(setting):
             raise(RuntimeError("Setting file %s doesn't exist. Check opt.train-list and opt.val-list. " % (setting)))
         clips = []
-        with open(setting) as split_f:
-            data = split_f.readlines()
-            for line in data:
-                line_info = line.split(' ')
-                # line format: video_path, video_duration, video_label
-                # if len(line_info) < 2:
-                #     raise(RuntimeError('Video input format is not correct, missing one or more element. %s' % line))
-                clip_path = os.path.join(line_info[0].strip())
-                # target = int(line_info[1])
-                # item = (clip_path, target)
-                clips.append(clip_path)
+        if setting.endswith(".csv"):
+            clips = pd.read_csv(setting).filenames
+        else:
+            with open(setting) as split_f:
+                data = split_f.readlines()
+                for line in data:
+                    line_info = line.split(' ')
+                    # line format: video_path, video_duration, video_label
+                    # if len(line_info) < 2:
+                    #     raise(RuntimeError('Video input format is not correct, missing one or more element. %s' % line))
+                    clip_path = os.path.join(line_info[0].strip())
+                    # target = int(line_info[1])
+                    # item = (clip_path, target)
+                    clips.append(clip_path)
         # return clips
         return clips
 

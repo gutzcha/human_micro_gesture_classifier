@@ -385,8 +385,11 @@ def rescale_frames(arr_list):
     normalized_arr = (arr - min_values) / (max_values - min_values)
     normalized_arr_list = [a for a in normalized_arr]
     return normalized_arr_list
-def save_list_of_images_as_video(image_array_list, output_path, fps):
+def save_list_of_images_as_video(image_array_list, output_path, fps, unnormalized=False):
     # Write the images to an MP4 file
+    if unnormalized:
+        image_array_list = unnormalize_frames(image_array_list)
+
     writer = imageio.get_writer(output_path, fps=fps)
     for image_array in image_array_list:
         writer.append_data(image_array)

@@ -13,7 +13,7 @@
 # Ignore PyTorch model files
 *.pth
 *.pt
-#*.joblib
+*.npy
 
 # Ignore Jupyter Notebook temporary files
 #.ipynb_checkpoints/

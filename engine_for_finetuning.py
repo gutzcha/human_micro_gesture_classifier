@@ -64,8 +64,9 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                     param_group["weight_decay"] = wd_schedule_values[it]
 
         samples = samples.to(device, non_blocking=True)
+        targets = targets.to(device, non_blocking=True)
         # targets = targets.to(device, non_blocking=True).float()
-        targets = targets.type(torch.LongTensor).to(device, non_blocking=True)
+        # targets = targets.type(torch.LongTensor).to(device, non_blocking=True)
 
         if mixup_fn is not None:
             samples, targets = mixup_fn(samples, targets)
@@ -178,7 +179,9 @@ def validation_one_epoch(data_loader, model, device, criterion=None):
         videos = batch[0]
         target = batch[1]
         videos = videos.to(device, non_blocking=True)
-        target = target.to(device, non_blocking=True).float()
+        target = target.to(device, non_blocking=True)
+        # target = target.to(device, non_blocking=True).float()
+        # target = target.type(torch.LongTensor).to(device, non_blocking=True)
 
         # compute output
         with torch.cuda.amp.autocast():
@@ -235,6 +238,7 @@ def final_test(data_loader, model, device, file, criterion=None):
 
         videos = videos.to(device, non_blocking=True)
         target = target.to(device, non_blocking=True)
+        # target = target.type(torch.LongTensor).to(device, non_blocking=True)
 
         # compute output
         with torch.cuda.amp.autocast():
@@ -262,8 +266,8 @@ def final_test(data_loader, model, device, file, criterion=None):
                                                     str(output.data[i].cpu().numpy().tolist()), \
                                                     str(int(target[i].cpu().numpy())), \
                                                     str(int(chunk_nb[i].cpu().numpy())), \
-                                                    str(int(split_nb[i].cpu().numpy()))),\
-                                                    str()
+                                                    str(int(split_nb[i].cpu().numpy())))
+
 
             final_result.append(string)
 
@@ -274,8 +278,10 @@ def final_test(data_loader, model, device, file, criterion=None):
         metric_logger.meters['acc1'].update(acc1.item(), n=batch_size)
         metric_logger.meters['acc5'].update(acc5.item(), n=batch_size)
 
-    if not os.path.exists(file):
-        os.mknod(file)
+    if not os.path.exists(file):  # made this compatible with windows as well
+        with open(file, 'a'):
+            os.utime(file, None)
+
     with open(file, 'w') as f:
         f.write("{}, {}\n".format(acc1, acc5))
         for line in final_result:

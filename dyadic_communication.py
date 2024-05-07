@@ -6,20 +6,21 @@ from random_erasing import RandomErasing
 import warnings
 from decord import VideoReader, cpu
 from torch.utils.data import Dataset
-import video_transforms as video_transforms 
+import video_transforms as video_transforms
 import volume_transforms as volume_transforms
 from run_videomae_vis import DataAugmentationForVideoMAEInference
 import ast
 import pandas as pd
 import re
 
+
 class DyadicvideoClsDataset(Dataset):
 
     def __init__(self, anno_path=None, data_path=None, mode='train', clip_len=2,
-                crop_size=224, short_side_size=244, new_height=244,
-                new_width=244, keep_aspect_ratio=True, num_segment=1,
-                num_crop=1, test_num_segment=1, test_num_crop=1,
-                view_crop_mapping=None,corner_crop_size=None,data_root=None,  args=None, **kwargs):
+                 crop_size=224, short_side_size=244, new_height=244,
+                 new_width=244, keep_aspect_ratio=True, num_segment=1,
+                 num_crop=1, test_num_segment=1, test_num_crop=1,
+                 view_crop_mapping=None, corner_crop_size=None, data_root=None, limit_data=None, args=None, **kwargs):
         self.anno_path = anno_path
         self.data_path = data_path
         self.mode = mode
@@ -41,7 +42,7 @@ class DyadicvideoClsDataset(Dataset):
         self.data_root = data_root
         self.is_multi_labels = args.multi_labels
         self.is_one_hot_labels = args.one_hot_labels
-
+        self.limit_data = limit_data  # debug 20
         if self.mode in ['train']:
             self.aug = True
             if self.args.reprob > 0:
@@ -49,39 +50,50 @@ class DyadicvideoClsDataset(Dataset):
         if VideoReader is None:
             raise ImportError("Unable to import `decord` which is required to read videos.")
 
-        
         if isinstance(self.anno_path, str):
             df = pd.read_csv(self.anno_path)
         else:
             df = self.anno_path
+
+        if self.limit_data is not None and self.limit_data <= len(df) and self.limit_data > 0:
+            df = df.iloc[:self.limit_data]
+
         dataset_samples = list(df['filenames'].values)
         if self.data_root is not None:
             if 'folder_name' in df.columns:
                 sub_folder = df['folder_name'].values[0]
-            else: # default
+            else:  # default
                 if mode == 'train':
-                    sub_folder='clips_train'
+                    sub_folder = 'clips_train'
                 elif mode == 'validation':
-                    sub_folder='clips_val'
+                    sub_folder = 'clips_val'
                 elif mode == 'test':
                     # test can be val in disguise
                     if anno_path.endswith('val.csv'):
-                        sub_folder='clips_val'
+                        sub_folder = 'clips_val'
                     else:
-                        sub_folder='clips_test'
-            data_folder = os.path.join(self.data_root,sub_folder)
-            dataset_samples = [os.path.join(data_folder, a) for  a in dataset_samples]
+                        sub_folder = 'clips_test'
+            data_folder = os.path.join(self.data_root, sub_folder)
+            dataset_samples = [os.path.join(data_folder, a) for a in dataset_samples]
         self.dataset_samples = dataset_samples
-        self.label_array = list(df['labels'].apply(lambda x: np.array(ast.literal_eval(re.sub(r'[,\s]+', ',', x)))))
+        if self.is_multi_labels or self.is_one_hot_labels:
+            self.label_array = list(df['labels'].apply(lambda x: np.array(ast.literal_eval(re.sub(r'[,\s]+', ',', x)))))
+        else:
+            self.label_array = list(df['labels'])
 
         # if not is_multi and is_one_hot convert to index
         if not self.is_multi_labels and self.is_one_hot_labels:
             self.label_array = [np.argmax(a) for a in self.label_array]
 
-
-        self.metadata_array = list(df['metadata'].apply(lambda x: np.array(ast.literal_eval(x)))) # convert to list of dicts with metadata
+        self.metadata_array = list(
+            df['metadata'].apply(lambda x: np.array(ast.literal_eval(x))))  # convert to list of dicts with metadata
         self.view_list = list(df['view'].values)
         self.data_root = data_root
+        # if self.limit_data is not None and self.limit_data <= len(self.dataset_samples) and self.limit_data > 0:
+        #     self.dataset_samples = self.dataset_samples[:self.limit_data]
+        #     self.view_list = self.view_list[:self.limit_data]
+        #     self.metadata_array = self.metadata_array[:self.limit_data]
+        #     self.label_array = self.label_array[:self.limit_data]
         if (mode == 'train'):
             pass
 
@@ -93,7 +105,7 @@ class DyadicvideoClsDataset(Dataset):
                 video_transforms.CenterCrop(size=(self.crop_size, self.crop_size)),
                 volume_transforms.ClipToTensor(),
                 video_transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                        std=[0.229, 0.224, 0.225])
+                                           std=[0.229, 0.224, 0.225])
             ])
         elif mode == 'test':
             self.data_resize = video_transforms.Compose([
@@ -103,7 +115,7 @@ class DyadicvideoClsDataset(Dataset):
             self.data_transform = video_transforms.Compose([
                 volume_transforms.ClipToTensor(),
                 video_transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                        std=[0.229, 0.224, 0.225])
+                                           std=[0.229, 0.224, 0.225])
             ])
             self.test_seg = []
             self.test_dataset = []
@@ -118,13 +130,13 @@ class DyadicvideoClsDataset(Dataset):
 
     def __getitem__(self, index):
         if self.mode == 'train':
-            args = self.args 
+            args = self.args
             scale_t = 1
 
             sample = self.dataset_samples[index]
             view = self.view_list[index]
             metadata = self.metadata_array[index]
-            buffer = self.loadvideo_decord(sample, sample_rate_scale=scale_t) # T H W C
+            buffer = self.loadvideo_decord(sample, sample_rate_scale=scale_t)  # T H W C
             if len(buffer) == 0:
                 while len(buffer) == 0:
                     warnings.warn("video {} not correctly loaded during training".format(sample))
@@ -150,8 +162,8 @@ class DyadicvideoClsDataset(Dataset):
                 return frame_list, label_list, index_list, {}
             else:
                 buffer = self._aug_frame(buffer, args)
-            
-            return buffer, self.label_array[index], sample.split("/")[-1].split(".")[0],metadata, [], []
+
+            return buffer, self.label_array[index], sample.split("/")[-1].split(".")[0], metadata, [], []
 
         elif self.mode == 'validation':
             sample = self.dataset_samples[index]
@@ -166,14 +178,14 @@ class DyadicvideoClsDataset(Dataset):
                     view = self.view_list[index]
                     metadata = self.metadata_array[index]
                     buffer = self.loadvideo_decord(sample)
-            
+
             # crop corner
             if self.view_crop_mapping is not None:
                 buffer = crop_corner(buffer, self.corner_crop_size, self.view_crop_mapping[view])
 
             buffer = self.data_transform(buffer)
-            
-            return buffer, self.label_array[index], sample.split("/")[-1].split(".")[0],metadata, [], []
+
+            return buffer, self.label_array[index], sample.split("/")[-1].split(".")[0], metadata, [], []
 
         elif self.mode == 'test':
             sample = self.test_dataset[index]
@@ -183,7 +195,7 @@ class DyadicvideoClsDataset(Dataset):
             buffer = self.loadvideo_decord(sample)
 
             while len(buffer) == 0:
-                warnings.warn("video {}, temporal {}, spatial {} not found during testing".format(\
+                warnings.warn("video {}, temporal {}, spatial {} not found during testing".format( \
                     str(self.test_dataset[index]), chunk_nb, split_nb))
                 index = np.random.randint(self.__len__())
                 sample = self.test_dataset[index]
@@ -191,7 +203,7 @@ class DyadicvideoClsDataset(Dataset):
                 metadata = self.metadata_array[index]
                 chunk_nb, split_nb = self.test_seg[index]
                 buffer = self.loadvideo_decord(sample)
-                
+
             # crop corner
             if self.view_crop_mapping is not None:
                 buffer = crop_corner(buffer, self.corner_crop_size, self.view_crop_mapping[view])
@@ -199,32 +211,32 @@ class DyadicvideoClsDataset(Dataset):
             buffer = self.data_resize(buffer)
             if isinstance(buffer, list):
                 buffer = np.stack(buffer, 0)
-            if self.test_num_crop>1:
+            if self.test_num_crop > 1:
                 spatial_step = 1.0 * (max(buffer.shape[1], buffer.shape[2]) - self.short_side_size) \
-                                    / (self.test_num_crop - 1)
+                               / (self.test_num_crop - 1)
                 spatial_start = int(split_nb * spatial_step)
             else:
-                
+
                 spatial_start = 0
-            temporal_start = chunk_nb # 0/1
-            
+            temporal_start = chunk_nb  # 0/1
+
             if buffer.shape[1] >= buffer.shape[2]:
                 buffer = buffer[temporal_start::2, \
-                       spatial_start:spatial_start + self.short_side_size, :, :]
+                         spatial_start:spatial_start + self.short_side_size, :, :]
             else:
                 buffer = buffer[temporal_start::2, \
-                       :, spatial_start:spatial_start + self.short_side_size, :]
+                         :, spatial_start:spatial_start + self.short_side_size, :]
 
             buffer = self.data_transform(buffer)
-            return buffer, self.label_array[index], sample.split("/")[-1].split(".")[0],metadata, \
-                   chunk_nb, split_nb
+            return buffer, self.label_array[index], sample.split("/")[-1].split(".")[0], metadata, \
+                chunk_nb, split_nb
         else:
             raise NameError('mode {} unkown'.format(self.mode))
 
     def _aug_frame(
-        self,
-        buffer,
-        args,
+            self,
+            buffer,
+            args,
     ):
 
         aug_transform = video_transforms.create_random_augment(
@@ -240,9 +252,9 @@ class DyadicvideoClsDataset(Dataset):
         buffer = aug_transform(buffer)
 
         buffer = [transforms.ToTensor()(img) for img in buffer]
-        buffer = torch.stack(buffer) # T C H W
-        buffer = buffer.permute(0, 2, 3, 1) # T H W C 
-        
+        buffer = torch.stack(buffer)  # T C H W
+        buffer = buffer.permute(0, 2, 3, 1)  # T H W C
+
         # T H W C 
         buffer = tensor_normalize(
             buffer, [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
@@ -282,7 +294,6 @@ class DyadicvideoClsDataset(Dataset):
 
         return buffer
 
-
     def loadvideo_decord(self, sample, sample_rate_scale=1):
         """Load video content using Decord"""
         fname = sample
@@ -308,10 +319,10 @@ class DyadicvideoClsDataset(Dataset):
             all_index = []
             tick = len(vr) / float(self.num_segment)
             all_index = list(np.array([int(tick / 2.0 + tick * x) for x in range(self.num_segment)] +
-                               [int(tick * x) for x in range(self.num_segment)]))
+                                      [int(tick * x) for x in range(self.num_segment)]))
             while len(all_index) < (self.num_segment * self.test_num_segment):
                 all_index.append(all_index[-1])
-            all_index = list(np.sort(np.array(all_index))) 
+            all_index = list(np.sort(np.array(all_index)))
             vr.seek(0)
             buffer = vr.get_batch(all_index).asnumpy()
             return buffer
@@ -320,13 +331,14 @@ class DyadicvideoClsDataset(Dataset):
         average_duration = len(vr) // self.num_segment
         all_index = []
         if average_duration > 0:
-            all_index += list(np.multiply(list(range(self.num_segment)), average_duration) + np.random.randint(average_duration,
-                                                                                                        size=self.num_segment))
+            all_index += list(
+                np.multiply(list(range(self.num_segment)), average_duration) + np.random.randint(average_duration,
+                                                                                                 size=self.num_segment))
         elif len(vr) > self.num_segment:
             all_index += list(np.sort(np.random.randint(len(vr), size=self.num_segment)))
         else:
             all_index += list(np.zeros((self.num_segment,)))
-        all_index = list(np.array(all_index)) 
+        all_index = list(np.array(all_index))
         vr.seek(0)
         buffer = vr.get_batch(all_index).asnumpy()
         return buffer
@@ -352,7 +364,7 @@ def crop_corner(frames, crop_size, corner):
         frames (tensor): spatially cropped frames.
     """
     assert corner in ['tl', 'tr', 'bl', 'br', 'mm']
-    _ , height, width, _ = frames.shape
+    _, height, width, _ = frames.shape
     if crop_size is None:
         crop_size = min([height, width])
     assert crop_size <= height and crop_size <= width, "Crop size must be smaller than the dimensions of the frames."
@@ -364,7 +376,7 @@ def crop_corner(frames, crop_size, corner):
         frames = frames[:, -crop_size:, -crop_size:, :]
     elif corner == 'tl':
         frames = frames[:, :crop_size, :crop_size, :]
-    else: # cornet == 'mm'
+    else:  # cornet == 'mm'
         crop_height = crop_width = crop_size
 
         # Calculate crop boundaries
@@ -377,17 +389,18 @@ def crop_corner(frames, crop_size, corner):
 
     return frames
 
+
 def spatial_sampling(
-    frames,
-    spatial_idx=-1,
-    min_scale=256,
-    max_scale=320,
-    crop_size=224,
-    random_horizontal_flip=True,
-    inverse_uniform_sampling=False,
-    aspect_ratio=None,
-    scale=None,
-    motion_shift=False,
+        frames,
+        spatial_idx=-1,
+        min_scale=256,
+        max_scale=320,
+        crop_size=224,
+        random_horizontal_flip=True,
+        inverse_uniform_sampling=False,
+        aspect_ratio=None,
+        scale=None,
+        motion_shift=False,
 ):
     """
     Perform spatial sampling on the given video frames. If spatial_idx is

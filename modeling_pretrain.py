@@ -26,15 +26,15 @@ def trunc_normal_(tensor, mean=0., std=1.):
     __call_trunc_normal_(tensor, mean=mean, std=std, a=-std, b=std)
 
 
-__all__ = [
-    'pretrain_videomae_micro_patch16_224',
-    'pretrain_videomae_mini_patch16_224',
-    'pretrain_videomae_small_patch16_224',
-    'pretrain_videomae_base_patch16_224', 
-    'pretrain_videomae_large_patch16_224', 
-    'pretrain_videomae_huge_patch16_224',
-    'pretrain_videomae_base_patch16_224_densepose_dual'
-]
+# __all__ = [
+#     'pretrain_videomae_micro_patch16_224',
+#     'pretrain_videomae_mini_patch16_224',
+#     'pretrain_videomae_small_patch16_224',
+#     'pretrain_videomae_base_patch16_224',
+#     'pretrain_videomae_large_patch16_224',
+#     'pretrain_videomae_huge_patch16_224',
+#     'pretrain_videomae_base_patch16_224_densepose_dual'
+# ]
 
 
 class PretrainVisionTransformerEncoder(nn.Module):
