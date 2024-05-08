@@ -9,9 +9,11 @@ import utils
 from timm.utils import ModelEma
 
 from scipy.special import softmax
+from torch.nn import Softmax
 from torch import sigmoid as logit
 from utils import accuracy_multilabel
 from timm.utils import accuracy as accuracy_singlelabel
+
 
 class NoneReturningObject:
     def __getitem__(self, index):
@@ -19,6 +21,8 @@ class NoneReturningObject:
 
 def train_class_batch(model, samples, target, criterion):
     outputs = model(samples)
+
+
     loss = criterion(outputs, target)
     return loss, outputs
 
@@ -49,7 +53,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
         optimizer.zero_grad()
 
     for data_iter_step, (samples, targets, _, _) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
-        if isinstance(targets,list):
+        if isinstance(targets, list):
             targets = torch.stack(targets).float()
         step = data_iter_step // update_freq
         if step >= num_training_steps_per_epoch:
@@ -65,8 +69,8 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
         samples = samples.to(device, non_blocking=True)
         targets = targets.to(device, non_blocking=True)
-        # targets = targets.to(device, non_blocking=True).float()
-        # targets = targets.type(torch.LongTensor).to(device, non_blocking=True)
+        if is_multilabel:
+            targets = targets.float()
 
         if mixup_fn is not None:
             samples, targets = mixup_fn(samples, targets)
@@ -119,6 +123,8 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                 n_true = (targets>0.5).sum(axis=0)
                 n_pred_correct = (((output>0.5) == (targets>0.5))*((targets>0.5).float())).sum(axis=0)
                 class_acc = (n_pred_correct/(n_true+1e-4)).mean()
+            elif is_one_hot:
+                class_acc = (output.max(-1)[-1] == targets.max(-1)[-1]).float().mean()
             else:
                 class_acc = (output.max(-1)[-1] == targets).float().mean()
         else:
@@ -178,14 +184,16 @@ def validation_one_epoch(data_loader, model, device, criterion=None):
     for batch in metric_logger.log_every(data_loader, 10, header):
         videos = batch[0]
         target = batch[1]
-        videos = videos.to(device, non_blocking=True)
         target = target.to(device, non_blocking=True)
-        # target = target.to(device, non_blocking=True).float()
+        if is_multilabel:
+            target = target.float()
         # target = target.type(torch.LongTensor).to(device, non_blocking=True)
 
         # compute output
         with torch.cuda.amp.autocast():
             output = model(videos)
+
+
             loss = criterion(output, target)
         if is_multilabel:
             output = logit(output)
@@ -238,11 +246,15 @@ def final_test(data_loader, model, device, file, criterion=None):
 
         videos = videos.to(device, non_blocking=True)
         target = target.to(device, non_blocking=True)
-        # target = target.type(torch.LongTensor).to(device, non_blocking=True)
+        if is_multilabel:
+            target = target.float()
 
         # compute output
         with torch.cuda.amp.autocast():
             output = model(videos)
+
+
+
             loss = criterion(output, target)
 
         if is_multilabel:

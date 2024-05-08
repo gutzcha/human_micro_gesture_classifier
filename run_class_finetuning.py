@@ -522,7 +522,10 @@ def main(args, ds_init):
     if args.eval:
         preds_file = os.path.join(args.output_dir, str(global_rank) + '.txt')
         test_stats = final_test(data_loader_test, model, device, preds_file, criterion)
-        torch.distributed.barrier()
+        try:
+            torch.distributed.barrier()
+        except ValueError:
+            pass
         if global_rank == 0:
             print("Start merging results...")
             final_top1 ,final_top5 = merge(args.output_dir, num_tasks)
@@ -549,6 +552,7 @@ def main(args, ds_init):
             log_writer=log_writer, start_steps=epoch * num_training_steps_per_epoch,
             lr_schedule_values=lr_schedule_values, wd_schedule_values=wd_schedule_values,
             num_training_steps_per_epoch=num_training_steps_per_epoch, update_freq=args.update_freq,
+            is_one_hot=args.one_hot_labels
         )
         if args.output_dir and args.save_ckpt:
             if (epoch + 1) % args.save_ckpt_freq == 0 or epoch + 1 == args.epochs:

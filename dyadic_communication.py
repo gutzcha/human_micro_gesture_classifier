@@ -82,18 +82,14 @@ class DyadicvideoClsDataset(Dataset):
             self.label_array = list(df['labels'])
 
         # if not is_multi and is_one_hot convert to index
-        if not self.is_multi_labels and self.is_one_hot_labels:
-            self.label_array = [np.argmax(a) for a in self.label_array]
+        # if not self.is_multi_labels and self.is_one_hot_labels:
+        #     self.label_array = [np.argmax(a) for a in self.label_array]
 
         self.metadata_array = list(
             df['metadata'].apply(lambda x: np.array(ast.literal_eval(x))))  # convert to list of dicts with metadata
         self.view_list = list(df['view'].values)
         self.data_root = data_root
-        # if self.limit_data is not None and self.limit_data <= len(self.dataset_samples) and self.limit_data > 0:
-        #     self.dataset_samples = self.dataset_samples[:self.limit_data]
-        #     self.view_list = self.view_list[:self.limit_data]
-        #     self.metadata_array = self.metadata_array[:self.limit_data]
-        #     self.label_array = self.label_array[:self.limit_data]
+
         if (mode == 'train'):
             pass
 
