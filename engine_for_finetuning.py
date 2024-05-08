@@ -165,7 +165,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
 
 @torch.no_grad()
-def validation_one_epoch(data_loader, model, device, criterion=None):
+def validation_one_epoch(data_loader, model, device, criterion=None, is_one_hot=False):
     if criterion is None:
         criterion = torch.nn.CrossEntropyLoss()
     
@@ -187,12 +187,18 @@ def validation_one_epoch(data_loader, model, device, criterion=None):
         target = target.to(device, non_blocking=True)
         if is_multilabel:
             target = target.float()
+        elif is_one_hot:
+            target = torch.argmax(target, dim=1)
+
         # target = target.type(torch.LongTensor).to(device, non_blocking=True)
 
         # compute output
-        with torch.cuda.amp.autocast():
-            output = model(videos)
-            loss = criterion(output, target)
+        # with torch.cuda.amp.autocast():
+        #     output = model(videos) #  there is an error that i can't resolve so i am casting manually:
+        ### RuntimeError: Input type (float) and bias type (struct c10::Half) should be the same
+
+        output = model(videos.type(torch.cuda.FloatTensor))
+        loss = criterion(output, target)
         if is_multilabel:
             output = logit(output)
         acc1, acc5 = accuracy(output, target, topk=(1, 5))

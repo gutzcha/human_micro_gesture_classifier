@@ -37,7 +37,7 @@ args = Namespace(multi_labels=False,
                  log_dir='D:\\Project-mpg microgesture\\human_micro_gesture_classifier\\scripts\\miga_smg\\videomae_vit_base_patch16_224_kinetic_400_densepose_dual_multi\\outputs',
                  device='cuda', seed=0, resume='', auto_resume=True, save_ckpt=True, start_epoch=0, eval=False,
                  dist_eval=True, num_workers=10, pin_mem=True, world_size=1, local_rank=-1, dist_on_itp=False,
-                 dist_url='env://', enable_deepspeed=False, distributed=False, one_hot_labels=True, limit_data=None)
+                 dist_url='env://', enable_deepspeed=False, distributed=False, one_hot_labels=True, limit_data=2)
 
 if __name__ == '__main__':
     main(args, None)
