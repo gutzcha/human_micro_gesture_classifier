@@ -71,6 +71,8 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
         targets = targets.to(device, non_blocking=True)
         if is_multilabel:
             targets = targets.float()
+        elif is_one_hot:
+            targets = torch.argmax(targets, dim=1)
 
         if mixup_fn is not None:
             samples, targets = mixup_fn(samples, targets)
@@ -252,19 +254,17 @@ def final_test(data_loader, model, device, file, criterion=None, is_one_hot=Fals
         target = target.to(device, non_blocking=True)
         if is_multilabel:
             target = target.float()
+        elif is_one_hot:
+            target = torch.argmax(target, dim=1)
 
         # compute output
         with torch.cuda.amp.autocast():
             output = model(videos)
-
-
-
             loss = criterion(output, target)
 
         if is_multilabel:
             output = logit(output)
-        elif is_one_hot:
-            target = torch.argmax(target, dim=1)
+
 
 
         for i in range(output.size(0)):
