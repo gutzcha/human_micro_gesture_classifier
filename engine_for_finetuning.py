@@ -192,8 +192,6 @@ def validation_one_epoch(data_loader, model, device, criterion=None):
         # compute output
         with torch.cuda.amp.autocast():
             output = model(videos)
-
-
             loss = criterion(output, target)
         if is_multilabel:
             output = logit(output)
@@ -213,7 +211,7 @@ def validation_one_epoch(data_loader, model, device, criterion=None):
 
 
 @torch.no_grad()
-def final_test(data_loader, model, device, file, criterion=None):
+def final_test(data_loader, model, device, file, criterion=None, is_one_hot=False):
     if criterion is None:
         criterion = torch.nn.CrossEntropyLoss()
     
@@ -259,6 +257,9 @@ def final_test(data_loader, model, device, file, criterion=None):
 
         if is_multilabel:
             output = logit(output)
+        elif is_one_hot:
+            target = torch.argmax(target, dim=1)
+
 
         for i in range(output.size(0)):
             # Debug
@@ -272,8 +273,8 @@ def final_test(data_loader, model, device, file, criterion=None):
                                                     str(int(split_nb[i].cpu().numpy())), \
                                                     str(video_path[i])
                                                     )
+
             else:
-         
                 string = "{} {} {} {} {}\n".format(ids[i], \
                                                     str(output.data[i].cpu().numpy().tolist()), \
                                                     str(int(target[i].cpu().numpy())), \
@@ -341,7 +342,8 @@ def merge(eval_path, num_tasks):
     for i, item in enumerate(dict_feats):
         input_lst.append([i, item, dict_feats[item], dict_label[item]])
     from multiprocessing import Pool
-    p = Pool(64)
+    # p = Pool(64)
+    p = Pool(None)  # use os.cpu_count()
     ans = p.map(compute_video, input_lst)
     top1 = [x[1] for x in ans]
     top5 = [x[2] for x in ans]

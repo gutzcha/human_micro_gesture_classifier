@@ -434,11 +434,16 @@ def main(args, ds_init):
     args.lr = args.lr * total_batch_size / 256
     args.min_lr = args.min_lr * total_batch_size / 256
     args.warmup_lr = args.warmup_lr * total_batch_size / 256
+
+    is_one_hot = args.one_hot_labels
+
     print("LR = %.8f" % args.lr)
     print("Batch size = %d" % total_batch_size)
     print("Update frequent = %d" % args.update_freq)
     print("Number of training examples = %d" % len(dataset_train))
     print("Number of training training per epoch = %d" % num_training_steps_per_epoch)
+    if is_one_hot:
+        print("Target encoding: one_hot")
 
     num_layers = model_without_ddp.get_num_layers()
     if args.layer_decay < 1.0:
@@ -521,7 +526,7 @@ def main(args, ds_init):
 
     if args.eval:
         preds_file = os.path.join(args.output_dir, str(global_rank) + '.txt')
-        test_stats = final_test(data_loader_test, model, device, preds_file, criterion)
+        test_stats = final_test(data_loader_test, model, device, preds_file, criterion,is_one_hot=is_one_hot)
         try:
             torch.distributed.barrier()
         except ValueError:
@@ -536,7 +541,8 @@ def main(args, ds_init):
                 with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
                     f.write(json.dumps(log_stats) + "\n")
         exit(0)
-        
+
+
 
     print(f"Start training for {args.epochs} epochs")
     start_time = time.time()
@@ -552,7 +558,7 @@ def main(args, ds_init):
             log_writer=log_writer, start_steps=epoch * num_training_steps_per_epoch,
             lr_schedule_values=lr_schedule_values, wd_schedule_values=wd_schedule_values,
             num_training_steps_per_epoch=num_training_steps_per_epoch, update_freq=args.update_freq,
-            is_one_hot=args.one_hot_labels
+            is_one_hot=is_one_hot
         )
         if args.output_dir and args.save_ckpt:
             if (epoch + 1) % args.save_ckpt_freq == 0 or epoch + 1 == args.epochs:
@@ -592,7 +598,7 @@ def main(args, ds_init):
                 f.write(json.dumps(log_stats) + "\n")
 
     preds_file = os.path.join(args.output_dir, str(global_rank) + '.txt')
-    test_stats = final_test(data_loader_test, model, device, preds_file, criterion)
+    test_stats = final_test(data_loader_test, model, device, preds_file, criterion,is_one_hot=is_one_hot)
     torch.distributed.barrier()
     if global_rank == 0:
         print("Start merging results...")
