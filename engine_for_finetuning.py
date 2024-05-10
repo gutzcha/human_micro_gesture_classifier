@@ -52,7 +52,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
     else:
         optimizer.zero_grad()
 
-    for data_iter_step, (samples, targets, _, _) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
+    for data_iter_step, (samples, targets, _, _, _, _) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
         if isinstance(targets, list):
             targets = torch.stack(targets).float()
         step = data_iter_step // update_freq

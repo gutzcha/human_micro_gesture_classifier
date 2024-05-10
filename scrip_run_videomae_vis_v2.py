@@ -99,14 +99,14 @@ models_dict_list = [
 #        {
 #     'experiment':'MPIG_densepose_dual_2',
 #     'description':'MPIG_densepose_dual - videoMAE-K400 , same as K400 but then was finetuned on MPIGroupInteractions dataset (train set) for 100 epochs, with denspose as additional decoding target',
-#     'checkpoint_path':'/videos/pretrained/MPIIGroupInteraction/k400_finetune_videomae_pretrain_dual_2_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100/checkpoint-69.pth',
+#     'checkpoint_path':'/videos/pretrained/MPIIGroupInteraction/k400_finetune_videomae_pretrain_dual_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100/checkpoint-69.pth',
 #     'model_name':'pretrain_videomae_base_patch16_224_densepose_dual',
 # },
 
 #        {
 #     'experiment':'MPIG_densepose_dual_2',
 #     'description':'MPIG_densepose_dual - videoMAE-K400 , same as K400 but then was finetuned on MPIGroupInteractions dataset (train set) for 100 epochs, with denspose as additional decoding target',
-#     'checkpoint_path':'/videos/pretrained/MPIIGroupInteraction/k400_finetune_videomae_pretrain_dual_2_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100/checkpoint-99.pth',
+#     'checkpoint_path':'/videos/pretrained/MPIIGroupInteraction/k400_finetune_videomae_pretrain_dual_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100/checkpoint-99.pth',
 #     'model_name':'pretrain_videomae_base_patch16_224_densepose_dual',
 # },
        {

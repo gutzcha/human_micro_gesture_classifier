@@ -9,7 +9,7 @@ paths:
   data_path: &data_path [*run_folder_name,"dataset"]
   data_root: &data_root ["D:\\","Project-mpg microgesture", "smg", "smg_split_files"]
   pos_weights_path: &pos_weights_path [*data_path,"weights.json"]
-  model_path: &model_path ["D:\\","Project-mpg microgesture","pretrained","pretrained","MPIIGroupInteraction","k400_finetune_videomae_pretrain_dual_2_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100","checkpoint-99.pth"]
+  model_path: &model_path ["D:\\","Project-mpg microgesture","pretrained","pretrained","MPIIGroupInteraction","k400_finetune_videomae_pretrain_dual_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100","checkpoint-99.pth"]
 
 training_details:
   num_trainers: &num_trainers 1

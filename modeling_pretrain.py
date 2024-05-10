@@ -21,6 +21,14 @@ def default_features_cfg(**kwargs):
     }
 
 
+def miga_features_cfg(**kwargs):
+    return {
+    'videos': {'folder': 'train', 'file_extention':'mp4', 'loss_weight':0.2},
+    'densepose': {'folder': 'densepose_train', 'file_extention':'mp4', 'loss_weight':0.8},
+    **kwargs
+    }
+
+
 
 def trunc_normal_(tensor, mean=0., std=1.):
     __call_trunc_normal_(tensor, mean=mean, std=std, a=-std, b=std)

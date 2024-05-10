@@ -15,7 +15,7 @@ from engine_for_pretraining_multi_decoder import train_one_epoch
 from utils import NativeScalerWithGradNormCount as NativeScaler
 import utils
 import modeling_pretrain
-from modeling_pretrain import default_features_cfg
+from modeling_pretrain import default_features_cfg, miga_features_cfg
 import yaml
 
 def get_args():
@@ -161,7 +161,8 @@ def main(args):
             args.features_cfg = yaml.safe_load(file)
     else:
         # Load default features configuration
-        args.features_cfg = default_features_cfg()
+        # args.features_cfg = default_features_cfg()
+        args.features_cfg = miga_features_cfg()
 
 
     device = torch.device(args.device)

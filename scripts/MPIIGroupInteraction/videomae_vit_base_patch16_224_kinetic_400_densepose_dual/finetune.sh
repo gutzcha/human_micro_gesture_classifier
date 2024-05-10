@@ -16,7 +16,7 @@ DATA_ROOT="/home/ubuntu/data_local/MPIIGroupInteraction"
 POS_WEIGHTS_PATH="${DATA_PATH}/weights.json"
 
 NUM_TRAINERS=8
-MODEL_PATH='/videos/pretrained/MPIIGroupInteraction/k400_finetune_videomae_pretrain_dual_2_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100/checkpoint-99.pth'
+MODEL_PATH='/videos/pretrained/MPIIGroupInteraction/k400_finetune_videomae_pretrain_dual_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100/checkpoint-99.pth'
 
 #/opt/conda/envs/pytorch/bin/python3\
 #OMP_NUM_THREADS=1 /opt/conda/envs/pytorch/bin/python3 -m torch.distributed.launch --nproc-per-node=8 --nnodes=1\

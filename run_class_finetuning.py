@@ -425,7 +425,7 @@ def main(args, ds_init):
 
     model_without_ddp = model
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    early_stop = utils.EarlyStopper(patience=3, min_delta=0.1)
+    early_stop = utils.EarlyStopper(patience=20, min_delta=0.1)
     print("Model = %s" % str(model_without_ddp))
     print('number of params:', n_parameters)
 

@@ -155,7 +155,7 @@ class DyadicvideoClsDataset(Dataset):
                     frame_list.append(new_frames)
                     label_list.append(label)
                     index_list.append(index)
-                return frame_list, label_list, index_list, {}
+                return frame_list, label_list, index_list, metadata, [], []
             else:
                 buffer = self._aug_frame(buffer, args)
 
