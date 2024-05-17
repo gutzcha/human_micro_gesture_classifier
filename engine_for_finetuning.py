@@ -13,6 +13,8 @@ from torch.nn import Softmax
 from torch import sigmoid as logit
 from utils import accuracy_multilabel
 from timm.utils import accuracy as accuracy_singlelabel
+from run_videomae_vis_v2 import save_list_of_images_as_video # for debuging
+#
 
 
 class NoneReturningObject:
@@ -39,7 +41,14 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                     start_steps=None, lr_schedule_values=None, wd_schedule_values=None,
                     num_training_steps_per_epoch=None, update_freq=None, is_one_hot=False):
     model.train(True)
-    is_multilabel = isinstance(criterion,torch.nn.modules.loss.BCEWithLogitsLoss)
+
+    # TODO DEBUG HARD CODE MULTIMODEL
+    # is_multilabel = isinstance(criterion,torch.nn.modules.loss.BCEWithLogitsLoss)
+    is_multilabel = True
+
+
+
+
     metric_logger = utils.MetricLogger(delimiter="  ")
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     metric_logger.add_meter('min_lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
@@ -52,9 +61,13 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
     else:
         optimizer.zero_grad()
 
-    for data_iter_step, (samples, targets, _, _, _, _) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
+    for data_iter_step, (samples, targets, sample_ind, extra_info, _, _) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
         if isinstance(targets, list):
             targets = torch.stack(targets).float()
+
+        # debug
+        save_list_of_images_as_video(samples[0], f'testing_sampler_{torch.argmax(targets[0]).item()}.mp4', 7, True)
+
         step = data_iter_step // update_freq
         if step >= num_training_steps_per_epoch:
             continue
@@ -115,9 +128,12 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                 optimizer.zero_grad()
                 if model_ema is not None:
                     model_ema.update(model)
-            loss_scale_value = loss_scaler.state_dict()["scale"]
-
-        torch.cuda.synchronize()
+            try:
+                loss_scale_value = loss_scaler.state_dict()["scale"]
+            except:
+                loss_scale_value = None
+        if torch.cuda.is_available():
+            torch.cuda.synchronize()
 
         if mixup_fn is None:
             if is_multilabel:

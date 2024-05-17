@@ -171,7 +171,10 @@ class MetricLogger(object):
 
 class TensorboardLogger(object):
     def __init__(self, log_dir):
-        self.writer = SummaryWriter(logdir=log_dir)
+        if SummaryWriter is not None:
+            self.writer = SummaryWriter(logdir=log_dir)
+        else:
+            self.writer = None
         self.step = 0
 
     def set_step(self, step=None):
@@ -584,20 +587,22 @@ def multiple_samples_collate(batch, fold=False):
     Returns:
         (tuple): collated data batch.
     """
-    inputs, labels, video_idx, extra_data = zip(*batch)
+    inputs, labels, video_idx, extra_data, chunk_nb, split_nb = zip(*batch)
     inputs = [item for sublist in inputs for item in sublist]
     labels = [item for sublist in labels for item in sublist]
     video_idx = [item for sublist in video_idx for item in sublist]
-    inputs, labels, video_idx, extra_data = (
+    inputs, labels, video_idx, extra_data, chunk_nb, split_nb = (
         default_collate(inputs),
         default_collate(labels),
         default_collate(video_idx),
         default_collate(extra_data),
+        default_collate(chunk_nb),
+        default_collate(split_nb),
     )
     if fold:
-        return [inputs], labels, video_idx, extra_data
+        return [inputs], labels, video_idx, extra_data, chunk_nb, split_nb
     else:
-        return inputs, labels, video_idx, extra_data
+        return inputs, labels, video_idx, extra_data, chunk_nb, split_nb
 
 
 def accuracy_multilabel(output, target, topk=(1,)):

@@ -73,20 +73,36 @@ class DyadicvideoClsDataset(Dataset):
                         sub_folder = 'clips_val'
                     else:
                         sub_folder = 'clips_test'
-            data_folder = os.path.join(self.data_root, sub_folder)
+            # TODO: FIX THIS PART LATER, THE FOLDER IS WHERE I WANT IT SO I DONT WANT TO APPEND ANYTHING
+            if not pd.isna(sub_folder):
+                data_folder = os.path.join(self.data_root, sub_folder)
+            else:
+                data_folder = self.data_root
             dataset_samples = [os.path.join(data_folder, a) for a in dataset_samples]
         self.dataset_samples = dataset_samples
         if self.is_multi_labels or self.is_one_hot_labels:
-            self.label_array = list(df['labels'].apply(lambda x: np.array(ast.literal_eval(re.sub(r'[,\s]+', ',', x)))))
+            df['labels'] = df['labels'].apply(lambda x: np.array(ast.literal_eval(x.replace(' ',',').replace('.',''))).astype(float))
+            # self.label_array = list(df['labels'].apply(lambda x: np.array(ast.literal_eval(re.sub(r'[,\s]+', ',', x)))).values)
+            # self.label_array = [np.array(a.copy()) for a in self.label_array]
+            self.label_array = df['labels'].values.tolist()
         else:
             self.label_array = list(df['labels'])
+
+        # # TODO: REMOVE THIS LATER - DEBUG
+        # print(self.label_array)
+        # print(len(self.label_array))
+        # print(self.label_array[0])
+        # print(type(self.label_array[0]))
+        # print(type(np.array(self.label_array[0])))
+        # print(np.array(self.label_array[0]))
 
         # if not is_multi and is_one_hot convert to index
         # if not self.is_multi_labels and self.is_one_hot_labels:
         #     self.label_array = [np.argmax(a) for a in self.label_array]
 
-        self.metadata_array = list(
-            df['metadata'].apply(lambda x: np.array(ast.literal_eval(x))))  # convert to list of dicts with metadata
+        # self.metadata_array = list(
+        #     df['metadata'].apply(lambda x: np.array(ast.literal_eval(x))))  # convert to list of dicts with metadata
+        self.metadata_array = df['metadata']
         self.view_list = list(df['view'].values)
         self.data_root = data_root
 
@@ -181,7 +197,7 @@ class DyadicvideoClsDataset(Dataset):
 
             buffer = self.data_transform(buffer)
 
-            return buffer, self.label_array[index], sample.split("/")[-1].split(".")[0], metadata, [], []
+            return buffer, self.label_array[index], [sample.split("/")[-1].split(".")[0]], metadata, [], []
 
         elif self.mode == 'test':
             sample = self.test_dataset[index]
