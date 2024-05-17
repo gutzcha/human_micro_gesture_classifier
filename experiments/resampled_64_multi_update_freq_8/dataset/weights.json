@@ -1,0 +1,89 @@
+{
+    "data": [
+        {
+            "class": 0,
+            "positive_weights": 3.171735461818873,
+            "negative_weights": -0.9092450035393396
+        },
+        {
+            "class": 1,
+            "positive_weights": 2.7977690207700796,
+            "negative_weights": -0.9015556912053955
+        },
+        {
+            "class": 2,
+            "positive_weights": 1.5427229462601428,
+            "negative_weights": -0.8374986638952077
+        },
+        {
+            "class": 3,
+            "positive_weights": 4.3679862200508985,
+            "negative_weights": -0.9209604553127421
+        },
+        {
+            "class": 4,
+            "positive_weights": 0.20640245988095182,
+            "negative_weights": -0.5370036175108345
+        },
+        {
+            "class": 5,
+            "positive_weights": 3.3424961962117514,
+            "negative_weights": -0.9118929725263853
+        },
+        {
+            "class": 6,
+            "positive_weights": 2.112654011907398,
+            "negative_weights": -0.8769100839427154
+        },
+        {
+            "class": 7,
+            "positive_weights": 1.0800149648525204,
+            "negative_weights": -0.7815187567137624
+        },
+        {
+            "class": 8,
+            "positive_weights": 0.13109652412184747,
+            "negative_weights": -0.4991043449198487
+        },
+        {
+            "class": 9,
+            "positive_weights": 4.160346855272654,
+            "negative_weights": -0.9197950672037658
+        },
+        {
+            "class": 10,
+            "positive_weights": 4.2587869280859065,
+            "negative_weights": -0.920377931024425
+        },
+        {
+            "class": 11,
+            "positive_weights": 1.535904738028366,
+            "negative_weights": -0.8368654184914609
+        },
+        {
+            "class": 12,
+            "positive_weights": 2.846959264960851,
+            "negative_weights": -0.9027425175735644
+        },
+        {
+            "class": 13,
+            "positive_weights": 2.5730267480921727,
+            "negative_weights": -0.8953016379623249
+        },
+        {
+            "class": 14,
+            "positive_weights": 4.311896753399855,
+            "negative_weights": -0.9206692355854013
+        },
+        {
+            "class": 15,
+            "positive_weights": 3.5234393930355847,
+            "negative_weights": -0.9142408507327112
+        },
+        {
+            "class": 16,
+            "positive_weights": 2.9256023922799645,
+            "negative_weights": -0.9045201202537745
+        }
+    ]
+}

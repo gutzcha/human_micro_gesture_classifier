@@ -39,10 +39,13 @@ class DataAugmentationForVideoMAE(object):
             self.masked_position_generator = TubeMaskingGenerator(
                 args.window_size, args.mask_ratio
             )
+        else:
+            self.masked_position_generator = None
 
     def __call__(self, images):
         process_data, _ = self.transform(images)
-        return process_data, self.masked_position_generator()
+        mask = None if self.masked_position_generator is None else self.masked_position_generator()
+        return process_data, mask
 
     def __repr__(self):
         repr = "(DataAugmentationForVideoMAE,\n"
@@ -257,8 +260,8 @@ def unnormalize_frames(img, device='cpu'):
         ori_img = ori_img * std + mean
         ori_img = [a for a in ori_img]
     else:
-        mean = torch.as_tensor(IMAGENET_DEFAULT_MEAN).to(device)[None, :, None, None, None]
-        std = torch.as_tensor(IMAGENET_DEFAULT_STD).to(device)[None, :, None, None, None]
+        mean = torch.as_tensor(IMAGENET_DEFAULT_MEAN).to(device)[:, None, None, None]
+        std = torch.as_tensor(IMAGENET_DEFAULT_STD).to(device)[:, None, None, None]
         ori_img = img.to(device) * std + mean  # in [0, 1]
     return ori_img
 
@@ -385,11 +388,13 @@ def rescale_frames(arr_list):
     normalized_arr = (arr - min_values) / (max_values - min_values)
     normalized_arr_list = [a for a in normalized_arr]
     return normalized_arr_list
-def save_list_of_images_as_video(image_array_list, output_path, fps, unnormalized=False):
+def save_list_of_images_as_video(image_array_list, output_path, fps, unnormalize=True):
     # Write the images to an MP4 file
-    if unnormalized:
+    if unnormalize:
         image_array_list = unnormalize_frames(image_array_list)
-
+    if isinstance(image_array_list, torch.Tensor):
+        number_of_frames = image_array_list.shape[1]
+        image_array_list = [np.array(ToPILImage()(image_array_list[:, vid, :, :].cpu().clamp(0, 0.996))) for vid in range(number_of_frames)]
     writer = imageio.get_writer(output_path, fps=fps)
     for image_array in image_array_list:
         writer.append_data(image_array)

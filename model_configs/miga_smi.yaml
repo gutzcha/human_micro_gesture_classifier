@@ -1,0 +1,63 @@
+paths:
+  project_folder: &project_folder ['D:\Project-mpg microgesture\human_micro_gesture_classifier']
+  experiment_name: &experiment_name "experiments"
+  run_name: &run_name "retrained_base_model_CondensedNearestNeighbour"
+  experiment_folder_name: &experiment_folder_name [*project_folder, *experiment_name]
+  run_folder_name: &run_folder_name [*experiment_folder_name, *run_name]
+
+  output_dir: &output_dir [*run_folder_name, "outputs_eval"]
+  data_path: &data_path [*run_folder_name,"dataset"]
+  data_root: &data_root 'D:\Project-mpg microgesture\smg\smg_split_files'
+  pos_weights_path: &pos_weights_path [*data_path,"weights.json"]
+  model_path: &model_path [*run_folder_name,'checkpoint-best.pth' ]
+
+training_details:
+  num_trainers: &num_trainers 1
+
+torchrun_params:
+  standalone: true
+  nnodes: 1
+  nproc_per_node: *num_trainers
+
+finetuning_params:
+  model: vit_base_patch16_224
+  data_set: dyadic_communication_mpigroup
+  multi_labels: true
+  pos_weight_path: *pos_weights_path
+  nb_classes: 17
+  data_path: *data_path
+  finetune: *model_path
+  log_dir: *output_dir
+  output_dir: *output_dir
+  batch_size: 1
+  num_sample: 1
+  input_size: 224
+  use_checkpoint: True
+  use_mean_pooling: True
+  init_scale: 0.001
+  short_side_size: 224
+  save_ckpt_freq: 100
+  num_frames: 16
+  num_segments: 1
+  tubelet_size: 2
+  opt: adamw
+  fc_drop_rate: 0
+  drop: 0.0
+  drop_path: 0.1
+  attn_drop_rate: 0
+  lr: 5e-4
+  opt_betas: [0.9, 0.999]
+  weight_decay: 0.05
+  epochs: 500
+  test_num_segment: 1
+  test_num_crop: 1
+  enable_deepspeed: true
+  mixup: 0
+  cutmix: 0
+  mixup_prob: 0
+  smoothing: 0
+  eval: true
+  data_root: *data_root
+  device: 'cuda'
+  mask_type: 'tube'
+  mask_ratio: 0

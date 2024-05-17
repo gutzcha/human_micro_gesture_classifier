@@ -53,3 +53,23 @@ ID2LABELS_SMG = {
     16: 'Playing with jewelry, and manipulating other objects',
     17: 'Illustrative hand gestures'
 }
+
+ID2LABELS_SMG_SHORT = {
+    1: 'Turtling neck',
+    2: 'Rubbing face',
+    3: 'Folding arms',
+    4: 'Touching nose',
+    5: 'Moving legs',
+    6: 'Scratching neck',
+    7: 'Arms behind',
+    8: 'Rubbing hands',
+    9: 'Arms akimbo',
+    10: 'Crossing legs',
+    11: 'Scratching body',
+    12: 'Touching face',
+    13: 'Adjusting hair',
+    14: 'Holding arms',
+    15: 'Pulling collar',
+    16: 'Playing wobjects',
+    17: 'Hand gestures'
+}

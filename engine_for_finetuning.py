@@ -11,6 +11,7 @@ from timm.utils import ModelEma
 from scipy.special import softmax
 from torch.nn import Softmax
 from torch import sigmoid as logit
+# from torch import softmax as logit
 from utils import accuracy_multilabel
 from timm.utils import accuracy as accuracy_singlelabel
 
@@ -21,8 +22,6 @@ class NoneReturningObject:
 
 def train_class_batch(model, samples, target, criterion):
     outputs = model(samples)
-
-
     loss = criterion(outputs, target)
     return loss, outputs
 
@@ -37,9 +36,9 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                     device: torch.device, epoch: int, loss_scaler, max_norm: float = 0,
                     model_ema: Optional[ModelEma] = None, mixup_fn: Optional[Mixup] = None, log_writer=None,
                     start_steps=None, lr_schedule_values=None, wd_schedule_values=None,
-                    num_training_steps_per_epoch=None, update_freq=None, is_one_hot=False):
+                    num_training_steps_per_epoch=None, update_freq=None, is_one_hot=False, is_multilabel=False):
     model.train(True)
-    is_multilabel = isinstance(criterion,torch.nn.modules.loss.BCEWithLogitsLoss)
+    # is_multilabel = isinstance(criterion,torch.nn.modules.loss.BCEWithLogitsLoss)
     metric_logger = utils.MetricLogger(delimiter="  ")
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     metric_logger.add_meter('min_lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
@@ -121,7 +120,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
         if mixup_fn is None:
             if is_multilabel:
-                output = logit(output)
+                output = logit(output, dim=1)
                 n_true = (targets>0.5).sum(axis=0)
                 n_pred_correct = (((output>0.5) == (targets>0.5))*((targets>0.5).float())).sum(axis=0)
                 class_acc = (n_pred_correct/(n_true+1e-4)).mean()
@@ -167,11 +166,11 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
 
 @torch.no_grad()
-def validation_one_epoch(data_loader, model, device, criterion=None, is_one_hot=False):
+def validation_one_epoch(data_loader, model, device, criterion=None, is_one_hot=False, is_multilabel=False):
     if criterion is None:
         criterion = torch.nn.CrossEntropyLoss()
     
-    is_multilabel = isinstance(criterion,torch.nn.modules.loss.BCEWithLogitsLoss)
+
     if is_multilabel:
         accuracy = accuracy_multilabel
     else:
@@ -202,7 +201,7 @@ def validation_one_epoch(data_loader, model, device, criterion=None, is_one_hot=
         output = model(videos.type(torch.cuda.FloatTensor))
         loss = criterion(output, target)
         if is_multilabel:
-            output = logit(output)
+            output = logit(output, dim=1)
         acc1, acc5 = accuracy(output, target, topk=(1, 5))
 
         batch_size = videos.shape[0]
@@ -219,11 +218,9 @@ def validation_one_epoch(data_loader, model, device, criterion=None, is_one_hot=
 
 
 @torch.no_grad()
-def final_test(data_loader, model, device, file, criterion=None, is_one_hot=False):
+def final_test(data_loader, model, device, file, criterion=None, is_one_hot=False, is_multilabel=False):
     if criterion is None:
         criterion = torch.nn.CrossEntropyLoss()
-    
-    is_multilabel = isinstance(criterion,torch.nn.modules.loss.BCEWithLogitsLoss)
     if is_multilabel:
         accuracy = accuracy_multilabel
     else:
@@ -263,7 +260,10 @@ def final_test(data_loader, model, device, file, criterion=None, is_one_hot=Fals
             loss = criterion(output, target)
 
         if is_multilabel:
-            output = logit(output)
+            try:
+                output = logit(output, dim=1)
+            except:
+                output = logit(output)
 
 
 

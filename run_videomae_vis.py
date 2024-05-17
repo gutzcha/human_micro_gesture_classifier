@@ -15,7 +15,7 @@ from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from decord import VideoReader, cpu
 from torchvision import transforms
 from transforms import *
-from masking_generator import  TubeMaskingGenerator
+from masking_generator import TubeMaskingGenerator
 import video_transforms
 import volume_transforms
 import imageio
@@ -67,6 +67,8 @@ class DataAugmentationForVideoMAEInference(DataAugmentationForVideoMAE):
             self.masked_position_generator = TubeMaskingGenerator(
                 args.window_size, args.mask_ratio
             )
+        else:
+            self.masked_position_generator = None
         
 
 def get_args():

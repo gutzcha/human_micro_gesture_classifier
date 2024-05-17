@@ -18,9 +18,38 @@ sys.path.append(osp.dirname(osp.dirname(osp.abspath(__file__))))
 #
 from run_class_finetuning import main
 
+# experiment_folder = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\retrained_base_model_CondensedNearestNeighbour'
+# experiment_folder = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\retrained_base_model_CondensedNearestNeighbour_crossent_loss'
+# output_dir = osp.join(experiment_folder, 'outputs_eval_sigmoid')
 
-args = Namespace(multi_labels=False,
-                 pos_weight_path='D:\\Project-mpg microgesture\\human_micro_gesture_classifier\\scripts\\miga_smg\\overfit_videomae_vit_base_patch16_224_kinetic_400_densepose_dual\\\dataset\\weights.json',
+experiment_folder = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\retrained_base_model_CondensedNearestNeighbour'
+output_dir = osp.join(experiment_folder, 'output_train_data')
+
+
+data_path = osp.join(experiment_folder, 'dataset')
+model_checkpoint = 'checkpoint-best.pth'
+model_path = osp.join(experiment_folder, model_checkpoint)
+eval = True
+limit_data = None
+
+args = Namespace(multi_labels=True,
+                 one_hot_labels=False,
+                 limit_data=limit_data,
+                 eval=eval,
+                 output_dir=output_dir,
+                 log_dir=output_dir,
+
+                 data_path=data_path,
+                 pos_weight_path=osp.join(data_path,'weights.json'),
+
+                 finetune=model_path,
+                 data_root='D:\\Project-mpg microgesture\\smg\\smg_split_files',
+                 data_set='dyadic_communication_mpigroup',
+                 model_key='model|module', model_prefix='',
+                 init_scale=0.001, use_checkpoint=False, use_mean_pooling=True,
+                 eval_data_path=None, nb_classes=17, imagenet_default_mean_and_std=True,
+                 num_segments=1, num_frames=16, sampling_rate=4,
+
                  batch_size=2, epochs=10, update_freq=1, save_ckpt_freq=1, model='vit_base_patch16_224',
                  tubelet_size=2, input_size=224, fc_drop_rate=0.0, drop=0.0, attn_drop_rate=0.0,
                  drop_path=0.1, disable_eval_during_finetuning=False,
@@ -38,19 +67,9 @@ args = Namespace(multi_labels=False,
                  short_side_size=224, test_num_segment=1, test_num_crop=1, reprob=0.25, remode='pixel',
                  recount=1, resplit=False, mixup=0.0, cutmix=0.0, cutmix_minmax=None, mixup_prob=0.0,
                  mixup_switch_prob=0.5, mixup_mode='batch',
-                 finetune=r'D:\Project-mpg microgesture\human_micro_gesture_classifier\scripts\miga_smg\overfit_videomae_vit_base_patch16_224_kinetic_400_densepose_dual\\outputs\checkpoint-0.pth',
-                 model_key='model|module', model_prefix='',
-                 init_scale=0.001, use_checkpoint=False, use_mean_pooling=True,
-                 data_path='D:\\Project-mpg microgesture\\human_micro_gesture_classifier\\scripts\\miga_smg\\overfit_videomae_vit_base_patch16_224_kinetic_400_densepose_dual\\\dataset',
-                 eval_data_path=None, nb_classes=17, imagenet_default_mean_and_std=True,
-                 num_segments=1, num_frames=16, sampling_rate=4,
-                 data_set='dyadic_communication_mpigroup',
-                 output_dir='D:\\Project-mpg microgesture\\human_micro_gesture_classifier\\scripts\\miga_smg\\overfit_videomae_vit_base_patch16_224_kinetic_400_densepose_dual\\\outputs_eval',
-                 data_root='D:\\Project-mpg microgesture\\smg\\smg_split_files',
-                 log_dir='D:\\Project-mpg microgesture\\human_micro_gesture_classifier\\scripts\\miga_smg\\overfit_videomae_vit_base_patch16_224_kinetic_400_densepose_dual\\\outputs_eval',
-                 device='cuda', seed=0, resume='', auto_resume=True, save_ckpt=True, start_epoch=0, eval=True,
+                 device='cuda', seed=0, resume='', auto_resume=True, save_ckpt=True, start_epoch=0,
                  dist_eval=False, num_workers=10, pin_mem=True, world_size=1, local_rank=-1, dist_on_itp=False,
-                 dist_url='env://', enable_deepspeed=False, distributed=False, one_hot_labels=False, limit_data=20)
+                 dist_url='env://', enable_deepspeed=False, distributed=False)
 
 if __name__ == '__main__':
     main(args, None)

@@ -19,22 +19,23 @@ from optim_factory import create_optimizer, get_parameter_groups, LayerDecayValu
 from datasets import build_dataset
 from engine_for_finetuning import train_one_epoch, validation_one_epoch, final_test, merge
 from utils import NativeScalerWithGradNormCount as NativeScaler
-from utils import  multiple_samples_collate
+from utils import multiple_samples_collate
 import utils
+
+
 # import modeling_finetune
 
 
 def get_args(**kwargs):
-    parser = argparse.ArgumentParser('VideoMAE fine-tuning and evaluation script for video classification', add_help=False)
+    parser = argparse.ArgumentParser('VideoMAE fine-tuning and evaluation script for video classification',
+                                     add_help=False)
 
-
-    #multilabel weights
+    # multilabel weights
     parser.add_argument('--multi_labels', action='store_true', default=False, help='Use multi-lable loss')
     parser.add_argument('--one_hot_labels', action='store_true', default=False, help='labels are onehot encoded')
     parser.add_argument('--pos_weight_path', default='', type=str,
                         help='path to weights json file path')
     parser.add_argument('--limit_data', default=None, type=int)
-
 
     parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--epochs', default=30, type=int)
@@ -44,7 +45,7 @@ def get_args(**kwargs):
     # Model parameters
     parser.add_argument('--model', default='vit_base_patch16_224', type=str, metavar='MODEL',
                         help='Name of model to train')
-    parser.add_argument('--tubelet_size', type=int, default= 2)
+    parser.add_argument('--tubelet_size', type=int, default=2)
     parser.add_argument('--input_size', default=224, type=int,
                         help='videos input size')
 
@@ -110,7 +111,7 @@ def get_args(**kwargs):
     parser.add_argument('--short_side_size', type=int, default=224)
     parser.add_argument('--test_num_segment', type=int, default=5)
     parser.add_argument('--test_num_crop', type=int, default=3)
-    
+
     # Random Erase params
     parser.add_argument('--reprob', type=float, default=0.25, metavar='PCT',
                         help='Random erase prob (default: 0.25)')
@@ -154,10 +155,12 @@ def get_args(**kwargs):
     parser.add_argument('--nb_classes', default=400, type=int,
                         help='number of the classification types')
     parser.add_argument('--imagenet_default_mean_and_std', default=True, action='store_true')
-    parser.add_argument('--num_segments', type=int, default= 1)
-    parser.add_argument('--num_frames', type=int, default= 16)
-    parser.add_argument('--sampling_rate', type=int, default= 4)
-    parser.add_argument('--data_set', default='Kinetics-400', choices=['Kinetics-400', 'SSV2', 'UCF101', 'HMDB51','image_folder','dyadic_communication', 'dyadic_communication_mpigroup'],
+    parser.add_argument('--num_segments', type=int, default=1)
+    parser.add_argument('--num_frames', type=int, default=16)
+    parser.add_argument('--sampling_rate', type=int, default=4)
+    parser.add_argument('--data_set', default='Kinetics-400',
+                        choices=['Kinetics-400', 'SSV2', 'UCF101', 'HMDB51', 'image_folder', 'dyadic_communication',
+                                 'dyadic_communication_mpigroup'],
                         type=str, help='dataset')
     parser.add_argument('--output_dir', default='',
                         help='path where to save, empty for no saving')
@@ -248,9 +251,8 @@ def main(args, ds_init):
         alt_anno_path = os.path.join(args.data_path, 'val.csv')
         dataset_test, _ = build_dataset(is_train=False, test_mode=True, args=args, anno_path=alt_anno_path)
         # except:
-            # print("No test dataset")
-            # dataset_test = None
-    
+        # print("No test dataset")
+        # dataset_test = None
 
     num_tasks = utils.get_world_size()
     global_rank = utils.get_rank()
@@ -261,8 +263,8 @@ def main(args, ds_init):
     if args.dist_eval:
         if len(dataset_val) % num_tasks != 0:
             print('Warning: Enabling distributed evaluation with an eval dataset not divisible by process number. '
-                    'This will slightly alter validation results as extra duplicate entries are added to achieve '
-                    'equal num of samples per-process.')
+                  'This will slightly alter validation results as extra duplicate entries are added to achieve '
+                  'equal num of samples per-process.')
         if dataset_val is not None:
             sampler_val = torch.utils.data.DistributedSampler(
                 dataset_val, num_replicas=num_tasks, rank=global_rank, shuffle=False)
@@ -385,14 +387,15 @@ def main(args, ds_init):
         # interpolate position embedding
         if 'pos_embed' in checkpoint_model:
             pos_embed_checkpoint = checkpoint_model['pos_embed']
-            embedding_size = pos_embed_checkpoint.shape[-1] # channel dim
-            num_patches = model.patch_embed.num_patches # 
-            num_extra_tokens = model.pos_embed.shape[-2] - num_patches # 0/1
+            embedding_size = pos_embed_checkpoint.shape[-1]  # channel dim
+            num_patches = model.patch_embed.num_patches  #
+            num_extra_tokens = model.pos_embed.shape[-2] - num_patches  # 0/1
 
-            # height (== width) for the checkpoint position embedding 
-            orig_size = int(((pos_embed_checkpoint.shape[-2] - num_extra_tokens)//(args.num_frames // model.patch_embed.tubelet_size)) ** 0.5)
+            # height (== width) for the checkpoint position embedding
+            orig_size = int(((pos_embed_checkpoint.shape[-2] - num_extra_tokens) // (
+                        args.num_frames // model.patch_embed.tubelet_size)) ** 0.5)
             # height (== width) for the new position embedding
-            new_size = int((num_patches // (args.num_frames // model.patch_embed.tubelet_size) )** 0.5)
+            new_size = int((num_patches // (args.num_frames // model.patch_embed.tubelet_size)) ** 0.5)
             # class_token and dist_token are kept unchanged
             if orig_size != new_size:
                 print("Position interpolate from %dx%d to %dx%d" % (orig_size, orig_size, new_size, new_size))
@@ -400,13 +403,16 @@ def main(args, ds_init):
                 # only the position tokens are interpolated
                 pos_tokens = pos_embed_checkpoint[:, num_extra_tokens:]
                 # B, L, C -> BT, H, W, C -> BT, C, H, W
-                pos_tokens = pos_tokens.reshape(-1, args.num_frames // model.patch_embed.tubelet_size, orig_size, orig_size, embedding_size)
+                pos_tokens = pos_tokens.reshape(-1, args.num_frames // model.patch_embed.tubelet_size, orig_size,
+                                                orig_size, embedding_size)
                 pos_tokens = pos_tokens.reshape(-1, orig_size, orig_size, embedding_size).permute(0, 3, 1, 2)
                 pos_tokens = torch.nn.functional.interpolate(
                     pos_tokens, size=(new_size, new_size), mode='bicubic', align_corners=False)
                 # BT, C, H, W -> BT, H, W, C ->  B, T, H, W, C
-                pos_tokens = pos_tokens.permute(0, 2, 3, 1).reshape(-1, args.num_frames // model.patch_embed.tubelet_size, new_size, new_size, embedding_size) 
-                pos_tokens = pos_tokens.flatten(1, 3) # B, L, C
+                pos_tokens = pos_tokens.permute(0, 2, 3, 1).reshape(-1,
+                                                                    args.num_frames // model.patch_embed.tubelet_size,
+                                                                    new_size, new_size, embedding_size)
+                pos_tokens = pos_tokens.flatten(1, 3)  # B, L, C
                 new_pos_embed = torch.cat((extra_tokens, pos_tokens), dim=1)
                 checkpoint_model['pos_embed'] = new_pos_embed
 
@@ -436,7 +442,10 @@ def main(args, ds_init):
     args.warmup_lr = args.warmup_lr * total_batch_size / 256
 
     is_one_hot = args.one_hot_labels
-    is_multilabel = args.multi_labels
+
+    # TODO: CHANGE THIS BACH LATER!!!!
+    # is_multilabel = args.multi_labels
+    is_multilabel = True
 
     print("LR = %.8f" % args.lr)
     print("Batch size = %d" % total_batch_size)
@@ -446,9 +455,11 @@ def main(args, ds_init):
     if is_one_hot:
         print("Target encoding: one_hot")
 
+
     num_layers = model_without_ddp.get_num_layers()
     if args.layer_decay < 1.0:
-        assigner = LayerDecayValueAssigner(list(args.layer_decay ** (num_layers + 1 - i) for i in range(num_layers + 2)))
+        assigner = LayerDecayValueAssigner(
+            list(args.layer_decay ** (num_layers + 1 - i) for i in range(num_layers + 2)))
     else:
         assigner = None
 
@@ -477,7 +488,7 @@ def main(args, ds_init):
 
         optimizer = create_optimizer(
             args, model_without_ddp, skip_list=skip_weight_decay_list,
-            get_num_layer=assigner.get_layer_id if assigner is not None else None, 
+            get_num_layer=assigner.get_layer_id if assigner is not None else None,
             get_layer_scale=assigner.get_scale if assigner is not None else None)
         loss_scaler = NativeScaler()
 
@@ -516,10 +527,13 @@ def main(args, ds_init):
         criterion = LabelSmoothingCrossEntropy(smoothing=args.smoothing)
     elif args.multi_labels:
         criterion = torch.nn.BCEWithLogitsLoss(pos_weight=positive_weights)
+        ### TODO: UGLY LAST MINUTE CHANGE ! FIX THIS LATER
+        criterion = torch.nn.CrossEntropyLoss(weight=positive_weights)
     else:
         criterion = torch.nn.CrossEntropyLoss(weight=positive_weights)
 
     print("criterion = %s" % str(criterion))
+    print("is_multilabel: %s" % str(is_multilabel))
 
     utils.auto_load_model(
         args=args, model=model, model_without_ddp=model_without_ddp,
@@ -535,16 +549,15 @@ def main(args, ds_init):
             pass
         if global_rank == 0:
             print("Start merging results...")
-            final_top1 ,final_top5 = merge(args.output_dir, num_tasks)
-            print(f"Accuracy of the network on the {len(dataset_test)} test videos: Top-1: {final_top1:.2f}%, Top-5: {final_top5:.2f}%")
+            final_top1, final_top5 = merge(args.output_dir, num_tasks)
+            print(
+                f"Accuracy of the network on the {len(dataset_test)} test videos: Top-1: {final_top1:.2f}%, Top-5: {final_top5:.2f}%")
             log_stats = {'Final top-1': final_top1,
-                        'Final Top-5': final_top5}
+                         'Final Top-5': final_top5}
             if args.output_dir and utils.is_main_process():
                 with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
                     f.write(json.dumps(log_stats) + "\n")
         exit(0)
-
-
 
     print(f"Start training for {args.epochs} epochs")
     start_time = time.time()
@@ -560,7 +573,7 @@ def main(args, ds_init):
             log_writer=log_writer, start_steps=epoch * num_training_steps_per_epoch,
             lr_schedule_values=lr_schedule_values, wd_schedule_values=wd_schedule_values,
             num_training_steps_per_epoch=num_training_steps_per_epoch, update_freq=args.update_freq,
-            is_one_hot=is_one_hot, is_multilabel=is_multilabel
+            is_one_hot=is_one_hot, is_multilabel=is_multilabel,
         )
         if args.output_dir and args.save_ckpt:
             if (epoch + 1) % args.save_ckpt_freq == 0 or epoch + 1 == args.epochs:
@@ -568,8 +581,7 @@ def main(args, ds_init):
                     args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer,
                     loss_scaler=loss_scaler, epoch=epoch, model_ema=model_ema)
         if data_loader_val is not None:
-            test_stats = validation_one_epoch(data_loader_val,
-                                              model, device, criterion,is_one_hot=is_one_hot,
+            test_stats = validation_one_epoch(data_loader_val, model, device, criterion, is_one_hot=is_one_hot,
                                               is_multilabel=is_multilabel)
             print(f"Accuracy of the network on the {len(dataset_val)} val videos: {test_stats['acc1']:.1f}%")
             if max_accuracy < test_stats["acc1"]:
@@ -602,7 +614,7 @@ def main(args, ds_init):
                 f.write(json.dumps(log_stats) + "\n")
 
     preds_file = os.path.join(args.output_dir, str(global_rank) + '.txt')
-    test_stats = final_test(data_loader_test, model, device, preds_file, criterion,is_one_hot=is_one_hot)
+    test_stats = final_test(data_loader_test, model, device, preds_file, criterion, is_one_hot=is_one_hot)
     try:
         torch.distributed.barrier()
     except ValueError:
@@ -610,14 +622,14 @@ def main(args, ds_init):
 
     if global_rank == 0:
         print("Start merging results...")
-        final_top1 ,final_top5 = merge(args.output_dir, num_tasks)
-        print(f"Accuracy of the network on the {len(dataset_test)} test videos: Top-1: {final_top1:.2f}%, Top-5: {final_top5:.2f}%")
+        final_top1, final_top5 = merge(args.output_dir, num_tasks)
+        print(
+            f"Accuracy of the network on the {len(dataset_test)} test videos: Top-1: {final_top1:.2f}%, Top-5: {final_top5:.2f}%")
         log_stats = {'Final top-1': final_top1,
-                    'Final Top-5': final_top5}
+                     'Final Top-5': final_top5}
         if args.output_dir and utils.is_main_process():
             with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
                 f.write(json.dumps(log_stats) + "\n")
-
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
