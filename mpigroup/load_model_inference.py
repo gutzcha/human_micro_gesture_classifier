@@ -8,7 +8,8 @@ from timm.models import create_model
 import torch
 from utils import load_state_dict, time_function_decorator
 from torch import sigmoid as logit
-from mpigroup.const import LABELS as LABELS_MAP
+# from mpigroup.const import LABELS as LABELS_MAP
+from miga.const import ID2LABELS_SMG_SHORT as LABELS_MAP
 import pandas as pd
 from PIL import Image
 from decord import VideoReader, cpu
@@ -100,7 +101,10 @@ class ModelInference:
         )
 
         checkpoint = torch.load(args.finetune, map_location='cpu')
-        checkpoint_model = checkpoint['module']
+        try:
+            checkpoint_model = checkpoint['module']
+        except:
+            checkpoint_model = checkpoint['model']
         load_state_dict(model, checkpoint_model)
         model = model.to(self.device)
         model.eval()

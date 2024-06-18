@@ -9,7 +9,7 @@ import os.path as osp
 
 from mpigroup.load_model_inference import ModelInference, get_args
 class VideoPipeline:
-    def __init__(self, overlap_size=8, cycle_time=1, inference_function=None):
+    def __init__(self, overlap_size=8, cycle_time=1, scale=1.0, inference_function=None):
         self.last_display_time = 0
         self.buffer = []
         self.overlap_size = overlap_size
@@ -23,6 +23,7 @@ class VideoPipeline:
         self.inference_thread_stop_flag = threading.Event()  # Event flag to stop the thread
         self.stop_flag = False
         self.predictions = None
+        self.scale = scale
     def capture_video(self, source):
 
 
@@ -84,7 +85,7 @@ class VideoPipeline:
         # Draw predictions on frames
         if self.predictions is None:
             return
-        threshold = 0.25
+        threshold = 0.4
         if 'Legs_crossed' in predictions:
             del predictions['Legs_crossed']
         # if any(value > threshold for value in predictions.values()):
@@ -94,7 +95,7 @@ class VideoPipeline:
                 color = (0, 255, 0)
             else:
                 color = (0, 0, 0)
-            cv2.putText(frame, f"{label}: {prediction:.2f}", (10, 30+30*ind), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+            cv2.putText(frame, f"{label}: {prediction:.2f}", (10, 25+25*ind), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
     def _display_frames(self):
         # Display frames with a lag
@@ -103,6 +104,8 @@ class VideoPipeline:
         if current_time - self.last_display_time >= display_delay + self.display_lag:
             frame = self.buffer[-1]
             self._draw_predictions(frame, self.predictions)
+            # rescale
+            frame = cv2.resize(frame, (0, 0), fx=self.scale, fy=self.scale)
             cv2.imshow('Frame', frame)
             self.last_display_time = current_time
 
@@ -118,10 +121,11 @@ def dummy_inference_function(frames):
 
 
 if __name__ == "__main__":
-    config_path = osp.join('..', 'model_configs', 'mpigroup_multiclass_inference_debug.yaml')
-    args = get_args(config_path)
+    # config_path = osp.join('..', 'model_configs', 'mpigroup_multiclass_inference_debug.yaml')
+    config_path = osp.join('..', 'model_configs', 'miga_smi_downsampled.yaml')
+    args, _ = get_args(config_path)
     inference_object = ModelInference(args)
     # path_to_video = "D:\\Project-mpg microgesture\\imigue\\0001.mp4"
     path_to_video = None
-    pipeline = VideoPipeline(overlap_size=8, cycle_time=1, inference_function=inference_object.run_inference)
+    pipeline = VideoPipeline(overlap_size=8, cycle_time=1, scale=2, inference_function=inference_object.run_inference)
     pipeline.capture_video(source=path_to_video)

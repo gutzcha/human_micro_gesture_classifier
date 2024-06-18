@@ -28,10 +28,7 @@ def softmax_func(x):
 def get_transformation():
     args = Namespace(
         mask_type=None,
-        num_frames=16,
-        sampling_rate=4,
-        input_size=224,
-        densepose=True)
+        input_size=224)
 
     return DataAugmentationForVideoMAEInference(args)
 
@@ -382,7 +379,7 @@ def test_MultiTimeResVideoInference(video_path, model_path, num_frames=16, sampl
     args_namespase.num_frames = num_frames
     args_namespase.sampling_rate = sampling_rate
     args_namespase.step_length = step_length
-    args_namespase.window_length_list = window_lengths if window_lengths is not None else [16, 32, 64]
+    args_namespase.window_length_list = window_lengths if window_lengths is not None else [32]
     args_namespase.start_frame = start_frame
     args_namespase.end_frame = end_frame
     args_namespase.smooth_function = softmax_func
@@ -391,7 +388,7 @@ def test_MultiTimeResVideoInference(video_path, model_path, num_frames=16, sampl
 
     add_start_end = f'_{start_frame:04}_{end_frame:04}' if start_frame is not None else ''
     video_name = os.path.basename(args_namespase.video_path).split('.')[0]
-    out_log_path = f'prediction_over_videos_{video_name}{add_start_end}.csv'
+    out_log_path = f'prediction_over_videos_{video_name}{add_start_end}_new_resampled.csv'
 
     args_namespase.log_path = out_log_path
 
@@ -405,10 +402,11 @@ if __name__ == "__main__":
     # test_process_predictions()
     video_path = r'D:\Project-mpg microgesture\smg\SMG_RGB_Phase1\smg_rgb_validate\Sample0031\Sample0031_color.mp4'
     # model_path = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\retrained_base_model_CondensedNearestNeighbour'
-    model_path = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\resampled_64_multi_update_freq_8\checkpoint-best.pth'
+    # model_path = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\resampled_64_multi_update_freq_8\checkpoint-best.pth'
+    model_path = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\resampled_64_multi_update_freq_8\down_sampled_data\checkpoint-best.pth'
     labels_path = r'D:\Project-mpg microgesture\smg\smg_data_phase1\smg_skeleton_validate\Sample0031\Sample0031_finelabels.csv'
-    start_frame = 21800
-    end_frame = 22200
+    start_frame = 12000
+    end_frame = 14000
     test_MultiTimeResVideoInference(video_path, model_path, num_frames=16, sampling_rate=None,
-                                    step_length=8, window_lengths=None, start_frame=start_frame, end_frame=end_frame,
+                                    step_length=4, window_lengths=None, start_frame=start_frame, end_frame=end_frame,
                                     labels_path=labels_path)

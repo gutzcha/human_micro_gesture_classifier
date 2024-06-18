@@ -58,7 +58,7 @@ ID2LABELS_SMG_SHORT = {
     1: 'Turtling neck',
     2: 'Rubbing face',
     3: 'Folding arms',
-    4: 'Touching nose',
+    4: 'Touching chest',
     5: 'Moving legs',
     6: 'Scratching neck',
     7: 'Arms behind',

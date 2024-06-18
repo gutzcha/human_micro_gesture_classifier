@@ -1,24 +1,23 @@
 paths:
-  project_folder: &project_folder [""]
-  experiment_name: &experiment_name "MPIIGroupInteraction" 
-  run_name: &run_name "videomae_vit_base_patch16_224_kinetic_400_densepose_dual" 
-  experiment_folder_name: &experiment_folder_name [*project_folder, "scripts", *experiment_name]
+  project_folder: &project_folder ['D:\Project-mpg microgesture\human_micro_gesture_classifier']
+  experiment_name: &experiment_name "experiments"
+  run_name: &run_name ["resampled_64_multi_update_freq_8","down_sampled_data"]
+  experiment_folder_name: &experiment_folder_name [*project_folder, *experiment_name]
   run_folder_name: &run_folder_name [*experiment_folder_name, *run_name]
 
   output_dir: &output_dir [*run_folder_name, "outputs_eval"]
   data_path: &data_path [*run_folder_name,"dataset"]
-  data_root: &data_root ["home","ubuntu", "data_local", "MPIIGroupInteraction"]
+  data_root: &data_root 'D:\Project-mpg microgesture\smg\smg_split_files'
   pos_weights_path: &pos_weights_path [*data_path,"weights.json"]
-#  model_path: &model_path ["D:\\","Project-mpg microgesture","human_micro_gesture_classifier", "scripts", "MPIIGroupInteraction", "videomae_vit_base_patch16_224_kinetic_400_densepose_dual", "outputs", "checkpoint-best", "mp_rank_00_model_states.pt"]
-  model_path: &model_path ["D:\\","Project-mpg microgesture","human_micro_gesture_classifier", "experiments", "resampled_64_multi_update_freq_8", "checkpoint-best.pth"]
+  model_path: &model_path [*run_folder_name,'checkpoint-69.pth' ]
 
-#training_details:
-#  num_trainers: &num_trainers 8
-#
-#torchrun_params:
-#  standalone: true
-#  nnodes: 1
-#  nproc_per_node: *num_trainers
+training_details:
+  num_trainers: &num_trainers 1
+
+torchrun_params:
+  standalone: true
+  nnodes: 1
+  nproc_per_node: *num_trainers
 
 finetuning_params:
   model: vit_base_patch16_224

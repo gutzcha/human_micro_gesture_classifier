@@ -22,7 +22,6 @@ import imageio
 import os.path as osp
 from modeling_pretrain import PretrainVisionTransformerMultiOutout
 
-
 class DataAugmentationForVideoMAE(object):
     def __init__(self, args):
         self.input_mean = [0.485, 0.456, 0.406]  # IMAGENET_DEFAULT_MEAN

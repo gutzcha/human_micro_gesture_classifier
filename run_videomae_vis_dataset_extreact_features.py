@@ -361,15 +361,14 @@ def main(args, ds_init):
     features_folder = os.path.join(args.output_dir,'extracted_features')
     if not os.path.exists(features_folder):
         os.makedirs(features_folder)
-
-    for img, targets, indexs, _ in tqdm(data_loader_train, total=len(data_loader_train)):
-        with torch.no_grad():
+    with torch.no_grad():
+        for img, targets, indexs, _ , _, _ in tqdm(data_loader_train, total=len(data_loader_train)):
             img = img.to(device)
             outputs = model.forward_features(img)
             outputs = outputs.detach().cpu().numpy()
             for ind, (output, target, index) in enumerate(zip(outputs, targets, indexs)):
                 file_names = os.path.join(features_folder, f'{index:04}_{ind:2d}.npy')
-                combined_array = np.concatenate((output, np.array([target.cpu().numpy()]), np.array([index.cpu().numpy()])))
+                combined_array = np.concatenate((output, np.array([target.cpu().numpy()]).squeeze(), np.array([index.cpu().numpy()])))
                 # Save the concatenated array
                 np.save(file_names, combined_array)
 

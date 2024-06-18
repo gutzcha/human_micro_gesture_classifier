@@ -16,6 +16,12 @@ import torch.distributed as dist
 from torch import inf
 import random
 
+import pandas as pd
+import re
+import ast
+import os.path as osp
+import matplotlib.pyplot as plt
+
 try:
     from tensorboardX import SummaryWriter
 except:
@@ -171,7 +177,10 @@ class MetricLogger(object):
 
 class TensorboardLogger(object):
     def __init__(self, log_dir):
-        self.writer = SummaryWriter(logdir=log_dir)
+        if SummaryWriter is not None:
+            self.writer = SummaryWriter(logdir=log_dir)
+        else:
+            self.writer = None
         self.step = 0
 
     def set_step(self, step=None):
@@ -584,20 +593,22 @@ def multiple_samples_collate(batch, fold=False):
     Returns:
         (tuple): collated data batch.
     """
-    inputs, labels, video_idx, extra_data = zip(*batch)
+    inputs, labels, video_idx, extra_data, chunk_nb, split_nb = zip(*batch)
     inputs = [item for sublist in inputs for item in sublist]
     labels = [item for sublist in labels for item in sublist]
     video_idx = [item for sublist in video_idx for item in sublist]
-    inputs, labels, video_idx, extra_data = (
+    inputs, labels, video_idx, extra_data, chunk_nb, split_nb = (
         default_collate(inputs),
         default_collate(labels),
         default_collate(video_idx),
         default_collate(extra_data),
+        default_collate(chunk_nb),
+        default_collate(split_nb),
     )
     if fold:
-        return [inputs], labels, video_idx, extra_data
+        return [inputs], labels, video_idx, extra_data, chunk_nb, split_nb
     else:
-        return inputs, labels, video_idx, extra_data
+        return inputs, labels, video_idx, extra_data, chunk_nb, split_nb
 
 
 def accuracy_multilabel(output, target, topk=(1,)):
@@ -662,12 +673,14 @@ def time_function_decorator(func, *args, **kwargs):
 
 
 import os
+
 try:
     import cv2
 except:
     pass
 
-def split_videos(folder_path, video_length = 2):
+
+def split_videos(folder_path, video_length=2):
     # Iterate over all files in the folder
     for filename in os.listdir(folder_path):
         if filename.endswith(".mp4"):  # Assuming all videos are in mp4 format
@@ -704,6 +717,122 @@ def split_videos(folder_path, video_length = 2):
                 # Move to the start of the next segment
                 cap.set(cv2.CAP_PROP_POS_FRAMES, end_frame)
             cap.release()
+
+def plot_confidence_heatmap(y_true, y_pred, feature_names):
+    n_features = len(feature_names)
+    n_samples = y_true.shape[0]
+
+    # Initialize a matrix to store confidence values for each label
+    confidence_matrix = np.zeros((n_features, n_features))
+
+    # Iterate through each label
+    for label_idx in range(n_features):
+        # Get indices where ground truth is 1 for the current label
+        label_indices = np.where(y_true[:, label_idx] == 1)[0]
+
+        # If no samples have this label, skip
+        if len(label_indices) == 0:
+            continue
+
+        # Get mean y_pred vector for rows where ground truth is 1 for this label
+        mean_y_pred = np.mean(y_pred[label_indices], axis=0)
+        mean_y_pred /= np.sum(mean_y_pred)
+        mean_y_pred *= 100  # Convert to percentage confidence value
+        mean_y_pred = np.round(mean_y_pred).astype(int)  # Round
+
+        # Store the confidence values for the current label
+        confidence_matrix[label_idx] = mean_y_pred # Convert to int
+
+    # Plot the heatmap
+    plt.figure(figsize=(10, 8))
+    plt.imshow(confidence_matrix, cmap='magma_r', aspect='auto', vmin=0, vmax=100)  # Set colormap scale
+    plt.colorbar(label='Confidence (%)')
+    for i in range(n_features):
+        for j in range(n_features):
+            c = 'white' if confidence_matrix[i, j] > 50 else 'black'  # Set text color based on confidence value
+            plt.text(j, i, str(int(confidence_matrix[i, j])), ha='center', va='center', color=c)
+    plt.xticks(np.arange(n_features), feature_names, rotation=-45, ha='right')
+    plt.yticks(np.arange(n_features), feature_names, rotation=0, va='center')
+    plt.xlabel('Predicted Label')
+    plt.ylabel('True Label')
+    plt.title('Confidence Heatmap')
+    plt.grid(False)  # Remove grid
+    plt.tick_params(axis='both', direction='out')  # Ticks pointing outside
+    plt.tick_params(axis='y', right=False, left=True)  # Move y-axis ticks to the left
+    plt.gca().xaxis.set_ticks_position('top')  # Move x-axis ticks to the top
+
+    # plt.subplots_adjust(left=0.2, right=0.8, top=0.8, bottom=0.2)  # Adjust subplot to fit labels
+    plt.show()
+
+
+def load_and_parse_txt(path_or_list, feature_names, file_names, search_pattern=None):
+    if search_pattern is None:
+        search_pattern = r'(.*?)\s+\[([^\]]+)\]\s+\[([^\]]+)\]\s+(\d+)\s+(\d+)'
+        # Read the text file into a list of lines
+    if isinstance(path_or_list, list):
+
+        df_list = []
+        logit_columns_list = []
+        pred_columns_list = []
+        gt_columns_list = []
+        for p in path_or_list:
+            df, logit_columns, pred_columns, gt_columns = load_and_parse_txt(p, feature_names, file_names)
+            df_list.append(df)
+            logit_columns_list.append(logit_columns)
+            pred_columns_list.append(pred_columns)
+            gt_columns_list.append(gt_columns)
+        return pd.concat(df_list), logit_columns_list, pred_columns_list, gt_columns_list
+    elif isinstance(path_or_list, str):
+        path = path_or_list
+
+    with open(path, 'r') as file:
+        lines = file.readlines()
+
+    # Extract relevant information from each line
+    data = []
+    indecies = []
+    TH = 0.4
+    for line in lines[1:]:
+
+        # Use regex to find index, predictions, and targets
+        # match = re.match(r'(\d+)\s+\[([^\]]+)\]\s+\[([^\]]+)\]\s+(\d+)\s+(\d+)', line.strip())
+        # match = re.match(r'(\d+\-[^ ]+)\s+\[([^\]]+)\]\s+\[([^\]]+)\]\s+(\d+)\s+(\d+)', line.strip())
+        match = re.match(search_pattern, line.strip())
+        if match:
+            # index = int(match.group(1))
+            index = match.group(1)
+
+            # Extract model predictions and convert to list using ast
+            logits_str = match.group(2)
+            logits = list(ast.literal_eval(logits_str))
+
+            predictions = ((np.array(logits) > TH).astype(int)).tolist()
+
+            # Extract targets and convert to list using ast
+            targets_str = f'[{match.group(3)}]'
+            targets = list(np.array(ast.literal_eval(targets_str)))
+
+            row_data = logits + predictions + targets
+            row_data = np.array(row_data)
+            data.append(row_data)
+            # indecies.append(int(index))
+            indecies.append(index)
+
+    # Create column names
+    logit_columns = [f"logit-{name}" for name in feature_names]
+    pred_columns = [f"pred-{name}" for name in feature_names]
+    gt_columns = [f"gt-{name}" for name in feature_names]
+    columns = logit_columns + pred_columns + gt_columns
+
+    # Create Pandas DataFrame
+    df = pd.DataFrame(data, columns=columns, index=indecies)
+    df[pred_columns + gt_columns] = df[pred_columns + gt_columns].astype(int)
+    # print(df.iloc[0])
+    # print(df.tail(1))
+    df['filenames'] = file_names
+    df['log_name'] = osp.basename(path)
+
+    return df, logit_columns, pred_columns, gt_columns
 
 
 @time_function_decorator
