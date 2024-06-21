@@ -1,0 +1,50 @@
+should_transfer_files = yes
+transfer_input_files = /fast/ygoussha/train.sif
+output_folder = /lustre/fast/fast/ygoussha/mac2024_experiments/eval_28
+
+executable = /usr/bin/singularity
+CmdLine = python /lustre/home/ygoussha/human_micro_gesture_classifier/run_class_finetuning.py \
+    --model vit_base_patch16_224 \
+    --data_set dyadic_communication_mpigroup \
+    --pos_weight_path /lustre/fast/fast/ygoussha/mac2024_experiments/dataset/weights.json \
+    --data_path /lustre/fast/fast/ygoussha/mac2024_experiments/dataset \
+    --finetune /lustre/fast/fast/ygoussha/mac2024_experiments/checkpoint-best.pth \
+    --log_dir /lustre/fast/fast/ygoussha/mac2024_experiments/eval_28 \
+    --output_dir /lustre/fast/fast/ygoussha/mac2024_experiments/eval_28 \
+    --nb_classes 56 \
+    --batch_size 2 \
+    --num_sample 1 \
+    --input_size 224 \
+    --short_side_size 224 \
+    --save_ckpt_freq 10 \
+    --num_frames 16 \
+    --opt adamw \
+    --lr 5e-4 \
+    --opt_betas 0.9 0.999 \
+    --weight_decay 0.05 \
+    --epochs 300 \
+    --dist_eval \
+    --test_num_segment 1 \
+    --test_num_crop 1 \
+    --mixup 0 \
+    --cutmix 0 \
+    --mixup_prob 0 \
+    --smoothing 0 \
+    --data_root /lustre/fast/fast/ygoussha/mac2024/track1 \
+    --multi_labels \
+    --eval
+
+
+arguments = exec --writable-tmpfs --nv --pwd=/tmp/home -H /tmp/home train.sif $(CmdLine)
+  
+request_cpus = 16
+request_memory = 16384
+request_gpus = 1
+request_disk = 200G
+  
+
+error = $(output_folder)/job.$(Cluster).$(Process).err
+output = $(output_folder)/job.$(Cluster).$(Process).out
+log = $(output_folder)/job.$(Cluster).log
+  
+queue

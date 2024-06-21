@@ -75,15 +75,15 @@ args.batch_size = 2
 args.lr = 0.000003
 args.save_ckpt_freq = 20
 args.epochs = 500
-args.log_dir = 'testing_new_model_debug'
-args.output_dir = 'testing_new_model_debug'
+args.log_dir = r'D:\Project-mpg microgesture\testing_pretrain'
+args.output_dir = r'D:\Project-mpg microgesture\testing_pretrain'
 
-args.root = '/videos/mpi_data/2Itzik/MPIIGroupInteraction/'
-args.data_path = 'train_data_mpig.txt'
+args.root = r'D:\Project-mpg microgesture\testing_pretrain\subsample'
+args.data_path = r'D:\Project-mpg microgesture\testing_pretrain\subsample.txt'
 args.mask_type = 'tube' 
 args.mask_ratio = 0.9 
 args.decoder_depth = 4 
-args.batch_size = 2 
+args.batch_size = 1
 args.num_frames = 16 
 args.sampling_rate = 4 
 args.input_size = 224
@@ -94,9 +94,9 @@ args.device='cuda:0'
 args.imagenet_default_mean_and_std=True
 args.model=model_name
 args.drop_path=0.0
-args.clone_decoder = False # True
-args.feature_cfg = False
+args.clone_decoder = True
+# args.features_cfg = None
 
 
-
-run_mae_pretraining_multi_decoder.main(args)
+if __name__ == "__main__":
+    run_mae_pretraining_multi_decoder.main(args)

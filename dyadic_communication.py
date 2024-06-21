@@ -8,7 +8,7 @@ from decord import VideoReader, cpu
 from torch.utils.data import Dataset
 import video_transforms as video_transforms
 import volume_transforms as volume_transforms
-from run_videomae_vis import DataAugmentationForVideoMAEInference
+# from run_videomae_vis import DataAugmentationForVideoMAEInference
 import ast
 import pandas as pd
 import re

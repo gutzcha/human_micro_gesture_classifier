@@ -1,0 +1,396 @@
+{
+    "data": [
+        {
+            "class": "shaking body",
+            "class_freq": 0.012569718405659094,
+            "positive_weights": 4.157522775384037,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "sitting straightly",
+            "class_freq": 0.006094408923955925,
+            "positive_weights": 5.280892459454265,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "shrugging",
+            "class_freq": 0.0007890082981907223,
+            "positive_weights": 8.648039321897057,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "turning around",
+            "class_freq": 0.00032648619235478164,
+            "positive_weights": 10.158224849589345,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "rising up",
+            "class_freq": 0.006312066385525779,
+            "positive_weights": 5.225453350734229,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "bowing head",
+            "class_freq": 0.01373962726159706,
+            "positive_weights": 4.022567188755342,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "head up",
+            "class_freq": 0.009876207318732145,
+            "positive_weights": 4.52683626855549,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "tilting head",
+            "class_freq": 0.018609712964222556,
+            "positive_weights": 3.5681647197753876,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "turning head",
+            "class_freq": 0.03923275744796626,
+            "positive_weights": 2.492993093710834,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "nodding",
+            "class_freq": 0.05234661950754999,
+            "positive_weights": 2.095749409590958,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "shaking head",
+            "class_freq": 0.04864644266086247,
+            "positive_weights": 2.1956371536354955,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "scratching arms",
+            "class_freq": 0.009223234934022582,
+            "positive_weights": 4.632512989921858,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "playing objects",
+            "class_freq": 0.0045708066929669436,
+            "positive_weights": 5.738871141426993,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "putting hands together",
+            "class_freq": 0.0038634199428649162,
+            "positive_weights": 6.009301999903064,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "rubbing hands",
+            "class_freq": 0.0017140525098626037,
+            "positive_weights": 7.342251710596006,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "pointing oneself",
+            "class_freq": 0.003346483471636512,
+            "positive_weights": 6.2418732853645205,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "clenching fist",
+            "class_freq": 0.003074411644674194,
+            "positive_weights": 6.379809722177834,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "stretching arms",
+            "class_freq": 0.014447014011699089,
+            "positive_weights": 3.946761716078676,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "retracting arms",
+            "class_freq": 0.003536933750510135,
+            "positive_weights": 6.15209207358015,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "waving",
+            "class_freq": 0.0112909808189362,
+            "positive_weights": 4.321181751525392,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "spreading hands",
+            "class_freq": 0.005985580193170997,
+            "positive_weights": 5.309395721659512,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "hands touching fingers",
+            "class_freq": 0.014501428377091553,
+            "positive_weights": 3.941094763419903,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "other finger movements",
+            "class_freq": 0.015208815127193579,
+            "positive_weights": 3.8694167528499075,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "illustrative gestures",
+            "class_freq": 0.01616106652156169,
+            "positive_weights": 3.778338594981541,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "shaking legs",
+            "class_freq": 0.009712964222554755,
+            "positive_weights": 4.552548654877099,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "curling legs",
+            "class_freq": 0.0026935110869269487,
+            "positive_weights": 6.595889749842461,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "spread legs",
+            "class_freq": 0.0037545912120799893,
+            "positive_weights": 6.055454052557525,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "closing legs",
+            "class_freq": 0.003945041490953612,
+            "positive_weights": 5.975568675059152,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "crossing legs",
+            "class_freq": 0.0024486464426608625,
+            "positive_weights": 6.7522713531385135,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "stretching feet",
+            "class_freq": 0.009413685212896204,
+            "positive_weights": 4.600895078816296,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "retracting feet",
+            "class_freq": 0.010529179703441709,
+            "positive_weights": 4.428292614221371,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "tiptoe",
+            "class_freq": 0.016215480886954157,
+            "positive_weights": 3.7733079918791157,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "scratching or touching neck",
+            "class_freq": 0.002530267990749558,
+            "positive_weights": 6.698408057169687,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "scratching or touching chest",
+            "class_freq": 0.00331927628894028,
+            "positive_weights": 6.255131856311769,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "scratching or touching back",
+            "class_freq": 0.0021221602503060807,
+            "positive_weights": 6.988095451382032,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "scratching or touching shoulder",
+            "class_freq": 0.0013331519521153584,
+            "positive_weights": 7.762135231954271,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "arms akimbo",
+            "class_freq": 0.0017412596925588356,
+            "positive_weights": 7.316050692128806,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "crossing arms",
+            "class_freq": 0.0017140525098626037,
+            "positive_weights": 7.342251710596006,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "playing or tidying hair",
+            "class_freq": 0.00361855529859883,
+            "positive_weights": 6.115144833017555,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "scratching or touching hindbrain",
+            "class_freq": 0.00331927628894028,
+            "positive_weights": 6.255131856311769,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "scratching or touching forehead",
+            "class_freq": 0.002339817711875935,
+            "positive_weights": 6.827059335078768,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "scratching or touching face",
+            "class_freq": 0.005142157529587812,
+            "positive_weights": 5.550626744342735,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "rubbing eyes",
+            "class_freq": 0.0026935110869269487,
+            "positive_weights": 6.595889749842461,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "touching nose",
+            "class_freq": 0.0059583730104747655,
+            "positive_weights": 5.31660643826507,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "touching ears",
+            "class_freq": 0.002094953067609849,
+            "positive_weights": 7.009418945887795,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "covering face",
+            "class_freq": 0.00021765746156985445,
+            "positive_weights": 10.854434953980363,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "covering mouth",
+            "class_freq": 0.0010066657597605768,
+            "positive_weights": 8.235100538057605,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "pushing glasses",
+            "class_freq": 0.0027751326350156443,
+            "positive_weights": 6.547023707943782,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "patting legs",
+            "class_freq": 0.017140525098626038,
+            "positive_weights": 3.690438579166869,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "touching legs",
+            "class_freq": 0.020269351108692695,
+            "positive_weights": 3.4418810253357575,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "scratching legs",
+            "class_freq": 0.0037273840293837574,
+            "positive_weights": 6.06720997983697,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "scratching feet",
+            "class_freq": 0.0008162154808869542,
+            "positive_weights": 8.590438131174132,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "body",
+            "class_freq": 0.03885185689021902,
+            "positive_weights": 2.506628802271975,
+            "negative_weights": NaN,
+            "method": "inv"
+        },
+        {
+            "class": "head",
+            "class_freq": 0.21161746701129097,
+            "positive_weights": 0.3895628970333003,
+            "negative_weights": 0.239105297965887,
+            "method": "inv"
+        },
+        {
+            "class": "hands",
+            "class_freq": 0.19080397224867365,
+            "positive_weights": 0.498012495800879,
+            "negative_weights": 0.16467124958427465,
+            "method": "inv"
+        },
+        {
+            "class": "legs",
+            "class_freq": 0.10066657597605767,
+            "positive_weights": 1.243023536786526,
+            "negative_weights": NaN,
+            "method": "inv"
+        }
+    ]
+}

@@ -1,0 +1,43 @@
+000 (15540050.000.000) 2024-06-20 12:23:00 Job submitted from host: <10.15.2.1:9618?PrivAddr=%3c172.22.0.101:9618%3fsock%3dschedd_8280_f843%3e&PrivNet=internal.cluster.is.localnet&addrs=10.15.2.1-9618&alias=sched.cluster.is.localnet&noUDP&sock=schedd_8280_f843>
+...
+040 (15540050.000.000) 2024-06-20 12:23:09 Started transferring input files
+	Transferring to host: <172.22.2.186:9618?addrs=172.22.2.186-9618&alias=g186.internal.cluster.is.localnet&noUDP&sock=slot1_8_5212_134d_12243>
+...
+040 (15540050.000.000) 2024-06-20 12:23:13 Finished transferring input files
+...
+001 (15540050.000.000) 2024-06-20 12:23:14 Job executing on host: <172.22.2.186:9618?addrs=172.22.2.186-9618&alias=g186.internal.cluster.is.localnet&noUDP&sock=startd_5002_88d0>
+...
+006 (15540050.000.000) 2024-06-20 12:23:23 Image size of job updated: 5045176
+	228  -  MemoryUsage of job (MB)
+	233176  -  ResidentSetSize of job (KB)
+...
+006 (15540050.000.000) 2024-06-20 12:28:23 Image size of job updated: 240138040
+	4385  -  MemoryUsage of job (MB)
+	4489512  -  ResidentSetSize of job (KB)
+...
+006 (15540050.000.000) 2024-06-20 12:28:33 Image size of job updated: 240138040
+	4397  -  MemoryUsage of job (MB)
+	4501892  -  ResidentSetSize of job (KB)
+...
+040 (15540050.000.000) 2024-06-20 12:28:34 Started transferring output files
+...
+040 (15540050.000.000) 2024-06-20 12:28:34 Finished transferring output files
+...
+005 (15540050.000.000) 2024-06-20 12:28:34 Job terminated.
+	(1) Normal termination (return value 1)
+		Usr 0 00:48:46, Sys 0 00:12:37  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:48:46, Sys 0 00:12:37  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	64071  -  Run Bytes Sent By Job
+	3294101504  -  Run Bytes Received By Job
+	64071  -  Total Bytes Sent By Job
+	3294101504  -  Total Bytes Received By Job
+	Partitionable Resources :      Usage   Request Allocated Assigned
+	   Cpus                 :      12.88        16        16 
+	   Disk (KB)            : 3216982    209715200 223437423 
+	   Gpus (Average)       :                    1         1 "GPU-17d0fdef"
+	   Memory (MB)          :    4397        16384     16384 
+
+	Job terminated of its own accord at 2024-06-20T10:28:33Z with exit-code 1.
+...

@@ -1,0 +1,18 @@
+python /lustre/home/ygoussha/human_micro_gesture_classifier/run_mae_pretraining_multi_decoder.py \
+        --mask_type tube \
+        --mask_ratio 0.9 \
+        --model pretrain_videomae_base_patch16_224_densepose_dual \
+        --decoder_depth 4 \
+        --batch_size 2 \
+        --num_frames 16 \
+        --sampling_rate 4 \
+        --opt adamw \
+        --opt_betas 0.9 0.95 \
+        --warmup_epochs 0 \
+        --save_ckpt_freq 10 \
+        --epochs 100 \
+        --data_path "D:\\Project-mpg microgesture\\testing_pretrain\\subsample.txt" \
+        --log_dir "D:\\Project-mpg microgesture\\testing_pretrain" \
+        --output_dir "D:\\Project-mpg microgesture\\testing_pretrain" \
+        --clone_decoder \
+        --root "D:\\Project-mpg microgesture\\testing_pretrain\\subsample"

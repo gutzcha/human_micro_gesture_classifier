@@ -1,0 +1,37 @@
+WARNING: Could not find any nv files on this host!
+/lustre/home/ygoussha/human_micro_gesture_classifier/modeling_finetune.py:306: UserWarning: Overwriting vit_small_patch16_224 in registry with modeling_finetune.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_patch16_224(pretrained=False, **kwargs):
+/lustre/home/ygoussha/human_micro_gesture_classifier/modeling_finetune.py:315: UserWarning: Overwriting vit_base_patch16_224 in registry with modeling_finetune.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_224(pretrained=False, **kwargs):
+/lustre/home/ygoussha/human_micro_gesture_classifier/modeling_finetune.py:324: UserWarning: Overwriting vit_base_patch16_384 in registry with modeling_finetune.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_384(pretrained=False, **kwargs):
+/lustre/home/ygoussha/human_micro_gesture_classifier/modeling_finetune.py:333: UserWarning: Overwriting vit_large_patch16_224 in registry with modeling_finetune.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_224(pretrained=False, **kwargs):
+/lustre/home/ygoussha/human_micro_gesture_classifier/modeling_finetune.py:342: UserWarning: Overwriting vit_large_patch16_384 in registry with modeling_finetune.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_384(pretrained=False, **kwargs):
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/opt/bitnami/python/lib/python3.10/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+  File "/opt/bitnami/python/lib/python3.10/multiprocessing/pool.py", line 48, in mapstar
+    return list(map(*args))
+  File "/lustre/home/ygoussha/human_micro_gesture_classifier/engine_for_finetuning.py", line 373, in compute_video
+    top1 = (int(pred) == int(label)) * 1.0
+ValueError: invalid literal for int() with base 10: '[0,'
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/lustre/home/ygoussha/human_micro_gesture_classifier/run_class_finetuning.py", line 627, in <module>
+    main(opts, ds_init)
+  File "/lustre/home/ygoussha/human_micro_gesture_classifier/run_class_finetuning.py", line 536, in main
+    final_top1 ,final_top5 = merge(args.output_dir, num_tasks)
+  File "/lustre/home/ygoussha/human_micro_gesture_classifier/engine_for_finetuning.py", line 360, in merge
+    ans = p.map(compute_video, input_lst)
+  File "/opt/bitnami/python/lib/python3.10/multiprocessing/pool.py", line 367, in map
+    return self._map_async(func, iterable, mapstar, chunksize).get()
+  File "/opt/bitnami/python/lib/python3.10/multiprocessing/pool.py", line 774, in get
+    raise self._value
+ValueError: invalid literal for int() with base 10: '[0,'

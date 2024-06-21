@@ -51,7 +51,6 @@ def build_pretraining_dataset_multi_decoder(args):
         use_decord=True,
         lazy_init=False,
         features_cfg=args.features_cfg,
-
         )
     print("Data Aug = %s" % str(transform))
     return dataset
@@ -138,7 +137,7 @@ def build_dataset(is_train, test_mode, args, anno_path=None):
         nb_classes = 174
     elif args.data_set == 'dyadic_communication':
         mode = None
-        anno_path = None
+        # anno_path = None
         if is_train is True:
             mode = 'train'
             anno_path = os.path.join(args.data_path, 'train.csv') if anno_path is None else anno_path
@@ -202,7 +201,7 @@ def build_dataset(is_train, test_mode, args, anno_path=None):
             new_height=224,
             new_width=224,
             view_crop_mapping=mpigroup_cropping_map,
-            corner_crop_size=1000,
+            corner_crop_size=None,
             limit_data=args.limit_data,
             args=args)
         nb_classes = args.nb_classes

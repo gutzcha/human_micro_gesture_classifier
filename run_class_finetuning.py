@@ -21,15 +21,17 @@ from engine_for_finetuning import train_one_epoch, validation_one_epoch, final_t
 from utils import NativeScalerWithGradNormCount as NativeScaler
 from utils import  multiple_samples_collate
 import utils
+from utils import HierarchicalCriterion
 # import modeling_finetune
 
 
 def get_args(**kwargs):
     parser = argparse.ArgumentParser('VideoMAE fine-tuning and evaluation script for video classification', add_help=False)
 
-
     #multilabel weights
     parser.add_argument('--multi_labels', action='store_true', default=False, help='Use multi-lable loss')
+    parser.add_argument('--hierarchical_labels', action='store_true', default=False, help='Use hierarchical loss')
+
     parser.add_argument('--one_hot_labels', action='store_true', default=False, help='labels are onehot encoded')
     parser.add_argument('--pos_weight_path', default='', type=str,
                         help='path to weights json file path')
@@ -437,6 +439,7 @@ def main(args, ds_init):
 
     is_one_hot = args.one_hot_labels
     is_multilabel = args.multi_labels
+    is_hierarchical = args.hierarchical_labels
 
     print("LR = %.8f" % args.lr)
     print("Batch size = %d" % total_batch_size)
@@ -516,8 +519,13 @@ def main(args, ds_init):
         criterion = LabelSmoothingCrossEntropy(smoothing=args.smoothing)
     elif args.multi_labels:
         criterion = torch.nn.BCEWithLogitsLoss(pos_weight=positive_weights)
+        # TODO: make this prettier,
+    elif args.hierarchical_labels:
+        criterion = HierarchicalCriterion(weights=positive_weights, fine_indices=range(52),
+                                          coarse_indices=range(52, 56), gamma=0.2)
     else:
         criterion = torch.nn.CrossEntropyLoss(weight=positive_weights)
+
 
     print("criterion = %s" % str(criterion))
 
@@ -528,7 +536,7 @@ def main(args, ds_init):
     if args.eval:
         preds_file = os.path.join(args.output_dir, str(global_rank) + '.txt')
         test_stats = final_test(data_loader_test, model, device, preds_file, criterion,
-                                is_one_hot=is_one_hot, is_multilabel=is_multilabel)
+                                is_one_hot=is_one_hot, is_multilabel=is_multilabel, is_hierarchical=is_hierarchical)
         try:
             torch.distributed.barrier()
         except ValueError:
@@ -560,7 +568,7 @@ def main(args, ds_init):
             log_writer=log_writer, start_steps=epoch * num_training_steps_per_epoch,
             lr_schedule_values=lr_schedule_values, wd_schedule_values=wd_schedule_values,
             num_training_steps_per_epoch=num_training_steps_per_epoch, update_freq=args.update_freq,
-            is_one_hot=is_one_hot, is_multilabel=is_multilabel
+            is_one_hot=is_one_hot, is_multilabel=is_multilabel, is_hierarchical=is_hierarchical
         )
         if args.output_dir and args.save_ckpt:
             if (epoch + 1) % args.save_ckpt_freq == 0 or epoch + 1 == args.epochs:
@@ -570,7 +578,7 @@ def main(args, ds_init):
         if data_loader_val is not None:
             test_stats = validation_one_epoch(data_loader_val,
                                               model, device, criterion,is_one_hot=is_one_hot,
-                                              is_multilabel=is_multilabel)
+                                              is_multilabel=is_multilabel, is_hierarchical=is_hierarchical)
             print(f"Accuracy of the network on the {len(dataset_val)} val videos: {test_stats['acc1']:.1f}%")
             if max_accuracy < test_stats["acc1"]:
                 max_accuracy = test_stats["acc1"]

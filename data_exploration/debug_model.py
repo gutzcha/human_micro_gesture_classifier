@@ -17,26 +17,30 @@ from run_class_finetuning import main
 
 # Set the path to save checkpoints
 # OUTPUT_DIR='YOUR_PATH/ssv2_videomae_pretrain_base_patch16_224_frame_16x2_tube_mask_ratio_0.9_e2400/eval_lr_5e-4_repeated_aug_epoch_30'
-OUTPUT_DIR='/home/ubuntu/efs/videoMAE/scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400'
+OUTPUT_DIR=r'D:\Project-mpg microgesture\human_micro_gesture_classifier\scripts\testing'
 
 # path to SSV2 annotation file (train.csv/val.csv/test.csv)
 # DATA_PATH='YOUR_PATH/list_ssv2'
-DATA_PATH='/home/ubuntu/efs/videoMAE/scripts/dyadic_communication_001/dataset'
+DATA_PATH=r'D:\Project-mpg microgesture\human_micro_gesture_classifier\scripts\mac\mac_multi\dataset'
 
 # path to pretrain model
 # MODEL_PATH='YOUR_PATH/ssv2_videomae_pretrain_base_patch16_224_frame_16x2_tube_mask_ratio_0.9_e2400/checkpoint-2399.pth'
-MODEL_PATH = '/home/ubuntu/efs/videoMAE/scripts/dyadic_communication_001/videomae_vit_base_patch16_224_tubemasking_ratio_0.9_epoch_2400/checkpoint-2399.pth'
-
+MODEL_PATH = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\mac_multi\pretrained_checkpoint-199.pth'
+DATA_ROOT = r'D:\Project-mpg microgesture\mac2024\track1'
 # batch_size can be adjusted according to number of GPUs
 # this script is for 64 GPUs (8 nodes x 8 GPUs)
 
 args = Namespace(
 
     #multilabel weights
-    multi_labels = True,
+    multi_labels = False,
+    one_hot_labels = True,
+    hierarchical_labels = True,
     pos_weight_path = osp.join(DATA_PATH,'weights.json'),
+    data_root = DATA_ROOT,
+    limit_data = 8,
 
-    batch_size= 4,
+    batch_size= 2,
     short_side_size= 224 ,
    
     update_freq=1,
@@ -101,7 +105,7 @@ args = Namespace(
 
     # Augmentation parameters
     color_jittert=0.4,     
-    num_sample=2,
+    num_sample=1,
     aa='rand-m7-n4-mstd0.5-inc1',
     smoothing=0,
     train_interpolation='bicubic',          
@@ -117,12 +121,12 @@ args = Namespace(
         # Dataset parameters
     data_path= DATA_PATH,
     eval_data_path = DATA_PATH,
-    nb_classes= 12,
+    nb_classes= 56,
     imagenet_default_mean_and_std = True, 
     num_frames= 16 ,
     num_segments = 1,
     sampling_rate = 4,
-    data_set = 'dyadic_communication',
+    data_set = 'dyadic_communication_mpigroup',
     log_dir= OUTPUT_DIR,
     output_dir= OUTPUT_DIR,
     device = 'cuda',
@@ -145,6 +149,7 @@ args = Namespace(
     pin_mem = True,
     # parser.add_argument('--no_pin_mem', action='store_false', dest='pin_mem')
     enable_deepspeed=False,
+
 
 
 )

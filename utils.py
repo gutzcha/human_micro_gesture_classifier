@@ -8,10 +8,14 @@ import datetime
 import numpy as np
 from timm.utils import get_state_dict
 from torch.utils.data._utils.collate import default_collate
+from timm.utils import accuracy as accuracy_singlelabel
+import torch.nn as nn
 from pathlib import Path
 import subprocess
 import torch
 import torch.distributed as dist
+from torch import sigmoid, softmax
+
 # from torch._six import inf
 from torch import inf
 import random
@@ -20,7 +24,11 @@ import pandas as pd
 import re
 import ast
 import os.path as osp
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except:
+    pass
+
 
 try:
     from tensorboardX import SummaryWriter
@@ -513,15 +521,21 @@ def auto_load_model(args, model, model_without_ddp, optimizer, loss_scaler, mode
                 checkpoint = torch.load(args.resume, map_location='cpu')
 
             # if there are missing decoder keys due to using base model, either clone the existing or add a new one
-
-            if not all(key in checkpoint['model'] for key in model.state_dict()):
+            # check if the checkpoint key is model or module
+            if 'model' in checkpoint:
+                checkpoint_name = 'model'
+            elif 'modul' in checkpoint:
+                checkpoint_name = 'modul'
+            else:
+                raise KeyError('No model or modul in checkpoint')
+            if not all(key in checkpoint[checkpoint_name] for key in model.state_dict()):
                 print(f'There are missing key in checkpoint, duplicating or initializing new ones')
                 checkpoint['model'] = clone_decoder_weights(num_decoders,
-                                                            checkpoint['model'],
+                                                            checkpoint[checkpoint_name],
                                                             model=model,
                                                             clone_flag=clone_decoder)
 
-            model_without_ddp.load_state_dict(checkpoint['model'])
+            model_without_ddp.load_state_dict(checkpoint[checkpoint_name])
             # load_matching_state_dict(model_without_ddp, checkpoint['module'])
             print("Resume checkpoint %s" % args.resume)
             if 'optimizer' in checkpoint and 'epoch' in checkpoint:
@@ -610,6 +624,26 @@ def multiple_samples_collate(batch, fold=False):
     else:
         return inputs, labels, video_idx, extra_data, chunk_nb, split_nb
 
+
+def accuracy_hierarchical(output, target, inds_fine, inds_coarse, topk=(1,)):
+
+    output_fine = output[:, inds_fine]
+    output_coarse = output[:, inds_coarse]
+
+    target_fine = target[:, inds_fine]
+    target_coarse = target[:, inds_coarse]
+
+    output_fine = softmax(output_fine, dim=1)
+    output_coarse = sigmoid(output_coarse)
+
+    target_fine = torch.argmax(target_fine, dim=1)
+
+    acc_fine = accuracy_singlelabel(output_fine, target_fine, topk)
+    acc_coarse = accuracy_multilabel(output_coarse, target_coarse, topk)
+
+    ret = torch.tensor([acc_fine, acc_coarse]).mean()
+
+    return ret
 
 def accuracy_multilabel(output, target, topk=(1,)):
     maxk = max(topk)
@@ -718,7 +752,15 @@ def split_videos(folder_path, video_length=2):
                 cap.set(cv2.CAP_PROP_POS_FRAMES, end_frame)
             cap.release()
 
-def plot_confidence_heatmap(y_true, y_pred, feature_names):
+def plot_confidence_heatmap(y_true, y_pred, feature_names, remove_features=None, annot=True):
+
+    if remove_features is not None:
+        features_inds_to_keep = [ind for ind, a in enumerate(feature_names) if a not in remove_features]
+        feature_names = [a for a in feature_names if a not in remove_features]
+        y_true = y_true[:, features_inds_to_keep]
+        y_pred = y_pred[:, features_inds_to_keep]
+
+
     n_features = len(feature_names)
     n_samples = y_true.shape[0]
 
@@ -747,10 +789,11 @@ def plot_confidence_heatmap(y_true, y_pred, feature_names):
     plt.figure(figsize=(10, 8))
     plt.imshow(confidence_matrix, cmap='magma_r', aspect='auto', vmin=0, vmax=100)  # Set colormap scale
     plt.colorbar(label='Confidence (%)')
-    for i in range(n_features):
-        for j in range(n_features):
-            c = 'white' if confidence_matrix[i, j] > 50 else 'black'  # Set text color based on confidence value
-            plt.text(j, i, str(int(confidence_matrix[i, j])), ha='center', va='center', color=c)
+    if annot:
+        for i in range(n_features):
+            for j in range(n_features):
+                c = 'white' if confidence_matrix[i, j] > 50 else 'black'  # Set text color based on confidence value
+                plt.text(j, i, str(int(confidence_matrix[i, j])), ha='center', va='center', color=c)
     plt.xticks(np.arange(n_features), feature_names, rotation=-45, ha='right')
     plt.yticks(np.arange(n_features), feature_names, rotation=0, va='center')
     plt.xlabel('Predicted Label')
@@ -840,6 +883,31 @@ def test_time_function_decorator(t=3):
     time.sleep(t)
     return
 
+
+class HierarchicalCriterion(nn.Module):
+    def __init__(self, weights, fine_indices, coarse_indices, gamma=0.5):
+        super(HierarchicalCriterion, self).__init__()
+        self.weights = weights
+        self.fine_indices = fine_indices
+        self.coarse_indices = coarse_indices
+        self.gamma = gamma
+
+    def forward(self, logits, targets):
+        # Extract fine and coarse labels and their corresponding weights
+        fine_labels = targets[:, self.fine_indices]
+        coarse_labels = targets[:, self.coarse_indices]
+
+        fine_weights = self.weights[self.fine_indices]
+        coarse_weights = self.weights[self.coarse_indices]
+
+        # Perform the loss computations
+        loss_fine = nn.CrossEntropyLoss(weight=fine_weights)(logits[:, self.fine_indices], fine_labels)
+        loss_coarse = nn.BCEWithLogitsLoss(pos_weight=coarse_weights)(logits[:, self.coarse_indices], coarse_labels)
+
+        # Mix the losses
+        mixed_loss = (1 - self.gamma) * loss_fine + self.gamma * loss_coarse
+
+        return mixed_loss
 
 if __name__ == '__main__':
     test_time_function_decorator(5)

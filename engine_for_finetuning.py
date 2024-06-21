@@ -12,7 +12,8 @@ from scipy.special import softmax
 from torch.nn import Softmax
 from torch import sigmoid as logit
 # from torch import softmax as logit
-from utils import accuracy_multilabel
+from utils import accuracy_multilabel, accuracy_hierarchical
+from functools import partial
 from timm.utils import accuracy as accuracy_singlelabel
 from run_videomae_vis_v2 import save_list_of_images_as_video # for debuging
 #
@@ -22,9 +23,9 @@ class NoneReturningObject:
     def __getitem__(self, index):
         return None
 
-def train_class_batch(model, samples, target, criterion):
+def train_class_batch(model, samples, targets, criterion):
     outputs = model(samples)
-    loss = criterion(outputs, target)
+    loss = criterion(outputs, targets)
     return loss, outputs
 
 
@@ -38,12 +39,18 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                     device: torch.device, epoch: int, loss_scaler, max_norm: float = 0,
                     model_ema: Optional[ModelEma] = None, mixup_fn: Optional[Mixup] = None, log_writer=None,
                     start_steps=None, lr_schedule_values=None, wd_schedule_values=None,
-                    num_training_steps_per_epoch=None, update_freq=None, is_one_hot=False, is_multilabel=False):
+                    num_training_steps_per_epoch=None, update_freq=None, is_one_hot=False, is_multilabel=False, is_hierarchical=False):
     model.train(True)
 
-    # TODO DEBUG HARD CODE MULTIMODEL
-    # is_multilabel = isinstance(criterion,torch.nn.modules.loss.BCEWithLogitsLoss)
-    is_multilabel = True
+
+
+
+    if is_multilabel:
+        accuracy = accuracy_multilabel
+    elif is_hierarchical:
+        accuracy = partial(accuracy_hierarchical, inds_fine=range(52), inds_coarse=range(52, 56))
+    else:
+        accuracy = accuracy_singlelabel
 
 
 
@@ -82,7 +89,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
         samples = samples.to(device, non_blocking=True)
         targets = targets.to(device, non_blocking=True)
-        if is_multilabel:
+        if is_multilabel or is_hierarchical:
             targets = targets.float()
         elif is_one_hot:
             targets = torch.argmax(targets, dim=1)
@@ -92,11 +99,11 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
         if loss_scaler is None:
             samples = samples.half()
-            loss, output = train_class_batch(
+            loss, outputs = train_class_batch(
                 model, samples, targets, criterion)
         else:
             with torch.cuda.amp.autocast():
-                loss, output = train_class_batch(
+                loss, outputs = train_class_batch(
                     model, samples, targets, criterion)
 
         loss_value = loss.item()
@@ -136,15 +143,19 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
             torch.cuda.synchronize()
 
         if mixup_fn is None:
+            # if is_multilabel or is_hierarchical:
+            #     targets = targets.float()
+            # elif is_one_hot:
+            #     targets = torch.argmax(targets, dim=1)
+
             if is_multilabel:
-                output = logit(output, dim=1)
-                n_true = (targets>0.5).sum(axis=0)
-                n_pred_correct = (((output>0.5) == (targets>0.5))*((targets>0.5).float())).sum(axis=0)
-                class_acc = (n_pred_correct/(n_true+1e-4)).mean()
+                outputs = logit(outputs)
+            elif is_hierarchical:
+                pass
             elif is_one_hot:
-                class_acc = (output.max(-1)[-1] == targets.max(-1)[-1]).float().mean()
-            else:
-                class_acc = (output.max(-1)[-1] == targets).float().mean()
+                pass
+            class_acc = accuracy(outputs, targets)
+
         else:
             class_acc = None
         metric_logger.update(loss=loss_value)
@@ -183,13 +194,15 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
 
 @torch.no_grad()
-def validation_one_epoch(data_loader, model, device, criterion=None, is_one_hot=False, is_multilabel=False):
+def validation_one_epoch(data_loader, model, device, criterion=None, is_one_hot=False, is_multilabel=False, is_hierarchical=False):
     if criterion is None:
         criterion = torch.nn.CrossEntropyLoss()
     
 
     if is_multilabel:
         accuracy = accuracy_multilabel
+    elif is_hierarchical:
+        accuracy = partial(accuracy_hierarchical, inds_fine=range(52), inds_coarse=range(52, 56))
     else:
         accuracy = accuracy_singlelabel
 
@@ -201,25 +214,31 @@ def validation_one_epoch(data_loader, model, device, criterion=None, is_one_hot=
 
     for batch in metric_logger.log_every(data_loader, 10, header):
         videos = batch[0]
-        target = batch[1]
-        target = target.to(device, non_blocking=True)
-        if is_multilabel:
-            target = target.float()
-        elif is_one_hot:
-            target = torch.argmax(target, dim=1)
+        targets = batch[1]
+        targets = targets.to(device, non_blocking=True)
 
-        # target = target.type(torch.LongTensor).to(device, non_blocking=True)
+        # targets = targets.type(torch.LongTensor).to(device, non_blocking=True)
 
-        # compute output
+        # compute outputs
         # with torch.cuda.amp.autocast():
-        #     output = model(videos) #  there is an error that i can't resolve so i am casting manually:
+        #     outputs = model(videos) #  there is an error that i can't resolve so i am casting manually:
         ### RuntimeError: Input type (float) and bias type (struct c10::Half) should be the same
 
-        output = model(videos.type(torch.cuda.FloatTensor))
-        loss = criterion(output, target)
+        outputs = model(videos.type(torch.cuda.FloatTensor))
+        if is_multilabel or is_hierarchical:
+            targets = targets.float()
+        elif is_one_hot:
+            targets = torch.argmax(targets, dim=1)
+
+        loss = criterion(outputs, targets)
         if is_multilabel:
-            output = logit(output, dim=1)
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
+            outputs = logit(outputs)
+        elif is_hierarchical:
+            pass
+        elif is_one_hot:
+            pass
+        acc1 = accuracy(outputs, targets, topk=(1,))
+        acc5 = torch.zeros(1)
 
         batch_size = videos.shape[0]
         metric_logger.update(loss=loss.item())
@@ -235,7 +254,7 @@ def validation_one_epoch(data_loader, model, device, criterion=None, is_one_hot=
 
 
 @torch.no_grad()
-def final_test(data_loader, model, device, file, criterion=None, is_one_hot=False, is_multilabel=False):
+def final_test(data_loader, model, device, file, criterion=None, is_one_hot=False, is_multilabel=False,is_hierarchical=False):
     if criterion is None:
         criterion = torch.nn.CrossEntropyLoss()
     if is_multilabel:
@@ -253,7 +272,7 @@ def final_test(data_loader, model, device, file, criterion=None, is_one_hot=Fals
     
     for batch in metric_logger.log_every(data_loader, 10, header):
         videos = batch[0]
-        target = batch[1].float()
+        targets = batch[1].float()
         ids = batch[2]
         metadata = batch[3]
         chunk_nb = batch[4]
@@ -265,33 +284,33 @@ def final_test(data_loader, model, device, file, criterion=None, is_one_hot=Fals
             video_path = NoneReturningObject()
 
         videos = videos.to(device, non_blocking=True)
-        target = target.to(device, non_blocking=True)
-        if is_multilabel:
-            target = target.float()
+        targets = targets.to(device, non_blocking=True)
+        if is_multilabel or is_hierarchical:
+            targets = targets.float()
         elif is_one_hot:
-            target = torch.argmax(target, dim=1)
+            targets = torch.argmax(targets, dim=1)
 
-        # compute output
+        # compute outputs
         with torch.cuda.amp.autocast():
-            output = model(videos)
-            loss = criterion(output, target)
+            outputs = model(videos)
+            loss = criterion(outputs, targets)
 
-        if is_multilabel:
+        if is_multilabel or is_hierarchical:
             try:
-                output = logit(output, dim=1)
+                outputs = logit(outputs, dim=1)
             except:
-                output = logit(output)
+                outputs = logit(outputs)
 
 
 
-        for i in range(output.size(0)):
+        for i in range(outputs.size(0)):
             # Debug
             
             # print(f'{chunk_nb=}')
-            if is_multilabel:
+            if is_multilabel or is_hierarchical:
                 string = "{} {} {} {} {}\n".format(ids[i], \
-                                                    str(output.data[i].cpu().numpy().tolist()), \
-                                                    str([int(a) for a in target[i].cpu().detach().numpy().tolist()]), \
+                                                    str(outputs.data[i].cpu().numpy().tolist()), \
+                                                    str([int(a) for a in targets[i].cpu().detach().numpy().tolist()]), \
                                                     str(int(chunk_nb[i].cpu().numpy())), \
                                                     str(int(split_nb[i].cpu().numpy())), \
                                                     str(video_path[i])
@@ -299,15 +318,15 @@ def final_test(data_loader, model, device, file, criterion=None, is_one_hot=Fals
 
             else:
                 string = "{} {} {} {} {}\n".format(ids[i], \
-                                                    str(output.data[i].cpu().numpy().tolist()), \
-                                                    str(int(target[i].cpu().numpy())), \
+                                                    str(outputs.data[i].cpu().numpy().tolist()), \
+                                                    str(int(targets[i].cpu().numpy())), \
                                                     str(int(chunk_nb[i].cpu().numpy())), \
                                                     str(int(split_nb[i].cpu().numpy())))
 
 
             final_result.append(string)
 
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
+        acc1, acc5 = accuracy(outputs, targets, topk=(1, 5))
 
         batch_size = videos.shape[0]
         metric_logger.update(loss=loss.item())

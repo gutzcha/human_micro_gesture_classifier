@@ -20,6 +20,7 @@ def train_one_epoch(model: torch.nn.Module, data_loader: Iterable, optimizer: to
     features_cfg = model.features_cfg
 
     loss_func = {k:nn.MSELoss() for k in features_cfg.keys()} # maybe try other losses for other features?
+    # print(f'Loss functions: {loss_func}')
     [metric_logger.add_meter(f'loss_{k}', utils.SmoothedValue(window_size=1, fmt='{value:.6f}')) for k in features_cfg.keys()]
     for step, batch in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
         # assign learning rate & weight decay for each step
