@@ -153,7 +153,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                 outputs = logit(outputs)
                 class_acc = accuracy(outputs, targets)
             elif is_hierarchical:
-                class_acc, _ = accuracy(outputs, targets)
+                class_acc = accuracy(outputs, targets)
             elif is_one_hot:
                 class_acc = accuracy(outputs, targets)
 
