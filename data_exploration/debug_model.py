@@ -38,7 +38,7 @@ args = Namespace(
     hierarchical_labels = True,
     pos_weight_path = osp.join(DATA_PATH,'weights.json'),
     data_root = DATA_ROOT,
-    limit_data = 8,
+    limit_data = 16,
 
     batch_size= 2,
     short_side_size= 224 ,
@@ -147,7 +147,6 @@ args = Namespace(
     dist_eval=False,
     num_workers = 10,
     pin_mem = True,
-    # parser.add_argument('--no_pin_mem', action='store_false', dest='pin_mem')
     enable_deepspeed=False,
 
 

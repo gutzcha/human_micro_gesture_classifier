@@ -79,3 +79,14 @@ def fine2coarse(num):
         return 5
     elif 48 <= num <= 51:
         return 6
+
+
+COARSE2FINE = {
+    0: range(0, 5),
+    1: range(5, 11),
+    2: range(11, 24),
+    3: range(24, 32),
+    4: range(32, 38),
+    5: range(38, 46),
+    6: range(48, 52)
+}

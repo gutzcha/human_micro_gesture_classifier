@@ -170,7 +170,7 @@ from utils import load_and_parse_txt
 
 
 def generate_combined_report(path_to_folder: str, path_dataset_folder: str, feature_names: List[str] = None, th=0.5,
-                             id_to_labels_map: Union[List, dict, None]=None ) -> None:
+                             id_to_labels_map: Union[List, dict, None]=None ):
     if feature_names is None:
         # Get feature names by loading the weights folder
         path_to_weights = osp.join(path_dataset_folder, 'weights.json')
@@ -285,7 +285,9 @@ def generate_combined_report(path_to_folder: str, path_dataset_folder: str, feat
     return df_report, logits, gt
 
 if __name__ == '__main__':
-    path_to_folder = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\mac_multi\eval_28'
+    path_to_folder = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\mac_multi\eval_93'
     path_dataset_folder = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\mac_multi\dataset'
     feature_names = None
-    generate_combined_report(path_to_folder, path_dataset_folder, feature_names)
+    df_report, _, _, = generate_combined_report(path_to_folder, path_dataset_folder, feature_names)
+    print(df_report)
+    print('Done...')

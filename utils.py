@@ -625,25 +625,24 @@ def multiple_samples_collate(batch, fold=False):
         return inputs, labels, video_idx, extra_data, chunk_nb, split_nb
 
 
-def accuracy_hierarchical(output, target, inds_fine, inds_coarse, topk=(1,)):
+def accuracy_hierarchical(output, target, inds_fine, inds_coarse=None, topk=(1,)):
 
     output_fine = output[:, inds_fine]
-    output_coarse = output[:, inds_coarse]
 
     target_fine = target[:, inds_fine]
-    target_coarse = target[:, inds_coarse]
-
-    output_fine = softmax(output_fine, dim=1)
-    output_coarse = sigmoid(output_coarse)
-
     target_fine = torch.argmax(target_fine, dim=1)
-
+    output_fine = softmax(output_fine, dim=1)
     acc_fine = accuracy_singlelabel(output_fine, target_fine, topk)
-    acc_coarse = accuracy_multilabel(output_coarse, target_coarse, topk)
 
-    ret = torch.tensor([acc_fine, acc_coarse]).mean()
+    if inds_coarse is not None:
+        output_coarse = output[:, inds_coarse]
+        target_coarse = target[:, inds_coarse]
+        output_coarse = sigmoid(output_coarse)
 
-    return ret
+        acc_coarse = accuracy_multilabel(output_coarse, target_coarse, topk)
+        return torch.tensor([acc_fine, acc_coarse]).mean()
+    else:
+        return acc_fine
 
 def accuracy_multilabel(output, target, topk=(1,)):
     maxk = max(topk)
@@ -752,7 +751,10 @@ def split_videos(folder_path, video_length=2):
                 cap.set(cv2.CAP_PROP_POS_FRAMES, end_frame)
             cap.release()
 
-def plot_confidence_heatmap(y_true, y_pred, feature_names, remove_features=None, annot=True):
+def plot_confidence_heatmap(y_true, y_pred, feature_names, remove_features=None, annot=True, plot_tile=None):
+
+    if plot_tile is None:
+        plot_tile = 'Confidence Heatmap'
 
     if remove_features is not None:
         features_inds_to_keep = [ind for ind, a in enumerate(feature_names) if a not in remove_features]
@@ -798,7 +800,7 @@ def plot_confidence_heatmap(y_true, y_pred, feature_names, remove_features=None,
     plt.yticks(np.arange(n_features), feature_names, rotation=0, va='center')
     plt.xlabel('Predicted Label')
     plt.ylabel('True Label')
-    plt.title('Confidence Heatmap')
+    plt.title(plot_tile)
     plt.grid(False)  # Remove grid
     plt.tick_params(axis='both', direction='out')  # Ticks pointing outside
     plt.tick_params(axis='y', right=False, left=True)  # Move y-axis ticks to the left
@@ -885,12 +887,14 @@ def test_time_function_decorator(t=3):
 
 
 class HierarchicalCriterion(nn.Module):
-    def __init__(self, weights, fine_indices, coarse_indices, gamma=0.5):
+    def __init__(self, weights, fine_indices, coarse_indices, gamma=0.5, criteria=None):
         super(HierarchicalCriterion, self).__init__()
         self.weights = weights
         self.fine_indices = fine_indices
         self.coarse_indices = coarse_indices
         self.gamma = gamma
+        if criteria is None:
+            self.criteria = {'fine': nn.CrossEntropyLoss, 'coarse': nn.BCEWithLogitsLoss}
 
     def forward(self, logits, targets):
         # Extract fine and coarse labels and their corresponding weights
@@ -901,8 +905,11 @@ class HierarchicalCriterion(nn.Module):
         coarse_weights = self.weights[self.coarse_indices]
 
         # Perform the loss computations
-        loss_fine = nn.CrossEntropyLoss(weight=fine_weights)(logits[:, self.fine_indices], fine_labels)
-        loss_coarse = nn.BCEWithLogitsLoss(pos_weight=coarse_weights)(logits[:, self.coarse_indices], coarse_labels)
+        loss_fine = self.criteria['fine'](weight=fine_weights)(logits[:, self.fine_indices], fine_labels)
+        loss_coarse = self.criteria['coarse'](pos_weight=coarse_weights)(logits[:, self.coarse_indices], coarse_labels)
+
+        # Debug: Print loss values
+        # print(f"loss_fine: {loss_fine.item()}, loss_coarse: {loss_coarse.item()}")
 
         # Mix the losses
         mixed_loss = (1 - self.gamma) * loss_fine + self.gamma * loss_coarse

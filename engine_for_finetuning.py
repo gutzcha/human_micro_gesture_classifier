@@ -48,7 +48,8 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
     if is_multilabel:
         accuracy = accuracy_multilabel
     elif is_hierarchical:
-        accuracy = partial(accuracy_hierarchical, inds_fine=range(52), inds_coarse=range(52, 56))
+        # accuracy = partial(accuracy_hierarchical, inds_fine=range(52), inds_coarse=range(52, 56))
+        accuracy = partial(accuracy_hierarchical, inds_fine=range(52), inds_coarse=None)
     else:
         accuracy = accuracy_singlelabel
 
