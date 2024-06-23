@@ -25,7 +25,7 @@ DATA_PATH=r'D:\Project-mpg microgesture\human_micro_gesture_classifier\scripts\m
 
 # path to pretrain model
 # MODEL_PATH='YOUR_PATH/ssv2_videomae_pretrain_base_patch16_224_frame_16x2_tube_mask_ratio_0.9_e2400/checkpoint-2399.pth'
-MODEL_PATH = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\mac_multi\pretrained_checkpoint-199.pth'
+MODEL_PATH = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\mac_multi\checkpoint-9.pth'
 DATA_ROOT = r'D:\Project-mpg microgesture\mac2024\track1'
 # batch_size can be adjusted according to number of GPUs
 # this script is for 64 GPUs (8 nodes x 8 GPUs)

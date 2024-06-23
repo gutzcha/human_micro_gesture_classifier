@@ -82,27 +82,62 @@ class VideoPipeline:
             self.inference_thread.join()
             self.predictions = None
 
-
-    def _draw_predictions(self, frame,  predictions):
-        # Draw predictions on frames
-        if self.predictions is None:
+    def _draw_predictions(self, frame, predictions):
+        if predictions is None:
             return
-        threshold = 0.4
-        # if 'Legs_crossed' in predictions:
-        #     del predictions['Legs_crossed']
-        # if any(value > threshold for value in predictions.values()):
-        ind = 0
-        for label, prediction in predictions.items():
-            if prediction > threshold:
-                color = (0, 255, 0)
-            # TODO : the prediction should be normalized by per-class th
-            elif self.display_style == 'all':
-                color = (0, 0, 0)
-            else:
-                continue  # don't add the text
-            ind += 1
-            cv2.putText(frame, f"{label}: {prediction:.2f}", (10, 25+25*ind), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
+        threshold = 0.8
+
+        # Create a display map dictionary
+        display_map = {}
+
+        # Define color options
+        color_dict = {
+            'above_th': (0, 255, 0),  # Green
+            'below_th': (0, 0, 0),  # Black
+            'bellow_th_top1': (0, 255, 255)  # Yellow (Note: Corrected from 'bellow_th_top1:note-name this yellow')
+        }
+
+        # Determine display logic based on predictions
+        if self.display_style == 'all':
+            display_all = True
+        else:
+            display_all = False
+            max_label = max(predictions, key=predictions.get)
+            max_prob = predictions[max_label]
+
+        for label, prediction in predictions.items():
+            # Determine color
+            if prediction > threshold:
+                color = color_dict['above_th']
+            elif display_all:
+                color = color_dict['below_th']
+            else:
+                if label == max_label:
+                    color = color_dict['bellow_th_top1']
+                else:
+                    continue  # Skip this label if not displaying all and not the top one
+
+            # Determine display logic
+            if display_all:
+                display = True
+            else:
+                display = (prediction > threshold or label == max_label)
+
+            # Populate display_map
+            display_map[label] = {
+                'color': color,
+                'probability': prediction,
+                'display': display
+            }
+
+        # Draw labels on frame
+        ind = 0
+        for label, info in display_map.items():
+            if info['display']:
+                ind += 1
+                cv2.putText(frame, f"{label}: {info['probability']:.2f}", (10, 25 + 25 * ind), cv2.FONT_HERSHEY_SIMPLEX,
+                            1, info['color'], 2)
     def _display_frames(self):
         # Display frames with a lag
         display_delay = 1 / self.display_frame_rate

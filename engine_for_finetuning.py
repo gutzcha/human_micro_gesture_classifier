@@ -203,7 +203,7 @@ def validation_one_epoch(data_loader, model, device, criterion=None, is_one_hot=
     if is_multilabel:
         accuracy = accuracy_multilabel
     elif is_hierarchical:
-        accuracy = partial(accuracy_hierarchical, inds_fine=range(52), inds_coarse=range(52, 56))
+        accuracy = partial(accuracy_hierarchical, inds_fine=range(52), inds_coarse=None)
     else:
         accuracy = accuracy_singlelabel
 
