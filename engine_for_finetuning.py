@@ -151,11 +151,11 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
             if is_multilabel:
                 outputs = logit(outputs)
-                class_acc = accuracy(outputs, targets)
+                class_acc[0] = accuracy(outputs, targets) # returns a list
             elif is_hierarchical:
-                class_acc = accuracy(outputs, targets)
+                class_acc[0] = accuracy(outputs, targets) # returns a list
             elif is_one_hot:
-                class_acc = accuracy(outputs, targets)
+                class_acc[0] = accuracy(outputs, targets) # returns a list
 
         else:
             class_acc = None
