@@ -14,6 +14,7 @@ import pandas as pd
 from PIL import Image
 from decord import VideoReader, cpu
 import numpy as np
+from scipy.special import softmax
 
 def pars_path(p: Union[str, List[Union[List, str]]]):
     assert isinstance(p, (list, str)), TypeError("p must be a List or a str")
@@ -80,6 +81,7 @@ class ModelInference:
         args.patch_size = patch_size
         self.args = args
         self.transform = self._get_data_transforms()
+        self.labels_map = [a['class'] for a in yaml.safe_load(open(args.pos_weight_path, 'r'))['data']]
 
 
     def _create_model(self, args):
@@ -131,16 +133,22 @@ class ModelInference:
         img = img.view((n_frames, 3) + img.size()[-2:]).transpose(0, 1)  # T*C,H,W -> T,C,H,W -> C,T,H,W
         img = img.unsqueeze(0)
         return img
-    def run_inference(self, vid, device=None):
+    def run_inference(self, vid, device=None, inds_to_include=None):
         if device is None:
             device = self.device
         vid = self._transform_video(vid)
         vid = vid.to(device)
         out = self.model(vid)
-        logits = logit(out).detach().cpu().tolist()
+        logits = logit(out).detach().cpu().tolist()[0]
+
+        labels = self.labels_map
+        if inds_to_include is not None:
+            logits = [logits[i] for i in inds_to_include]
+            # logits = softmax(logits)
+            labels = [labels[i] for i in inds_to_include]
         # df = pd.DataFrame(logits, columns=LABELS_MAP.values()).to_dict()
 
-        return {a:v for a, v in zip(LABELS_MAP.values(), logits[0])}
+        return {a:v for a, v in zip(labels, logits)}
 
         # args = get_args(config_path)
 
