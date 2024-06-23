@@ -151,11 +151,11 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
             if is_multilabel:
                 outputs = logit(outputs)
+                class_acc = accuracy(outputs, targets)
             elif is_hierarchical:
-                pass
+                class_acc, _ = accuracy(outputs, targets)
             elif is_one_hot:
-                pass
-            class_acc = accuracy(outputs, targets)
+                class_acc = accuracy(outputs, targets)
 
         else:
             class_acc = None
@@ -238,8 +238,8 @@ def validation_one_epoch(data_loader, model, device, criterion=None, is_one_hot=
             pass
         elif is_one_hot:
             pass
-        acc1 = accuracy(outputs, targets, topk=(1,))
-        acc5 = torch.zeros(1)
+        acc1, acc5 = accuracy(outputs, targets, topk=(1,5))
+
 
         batch_size = videos.shape[0]
         metric_logger.update(loss=loss.item())

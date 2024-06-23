@@ -9,7 +9,7 @@ import torch
 from utils import load_state_dict, time_function_decorator
 from torch import sigmoid as logit
 # from mpigroup.const import LABELS as LABELS_MAP
-from miga.const import ID2LABELS_SMG_SHORT as LABELS_MAP
+# from miga.const import ID2LABELS_SMG_SHORT as LABELS_MAP
 import pandas as pd
 from PIL import Image
 from decord import VideoReader, cpu

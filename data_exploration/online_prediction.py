@@ -9,7 +9,7 @@ import os.path as osp
 
 from mpigroup.load_model_inference import ModelInference, get_args
 class VideoPipeline:
-    def __init__(self, overlap_size=8, cycle_time=1, scale=1.0, inference_function=None):
+    def __init__(self, overlap_size=8, cycle_time=1, scale=1.0, inference_function=None, display_style='all'):
         self.last_display_time = 0
         self.buffer = []
         self.overlap_size = overlap_size
@@ -24,6 +24,7 @@ class VideoPipeline:
         self.stop_flag = False
         self.predictions = None
         self.scale = scale
+        self.display_style = display_style
     def capture_video(self, source):
 
 
@@ -86,15 +87,18 @@ class VideoPipeline:
         if self.predictions is None:
             return
         threshold = 0.4
-        if 'Legs_crossed' in predictions:
-            del predictions['Legs_crossed']
+        # if 'Legs_crossed' in predictions:
+        #     del predictions['Legs_crossed']
         # if any(value > threshold for value in predictions.values()):
 
         for ind, (label, prediction) in enumerate(predictions.items()):
             if prediction > threshold:
                 color = (0, 255, 0)
-            else:
+            # TODO : the prediction should be normalized by per-class th
+            elif self.display_style == 'all':
                 color = (0, 0, 0)
+            else:
+                continue  # don't add the text
             cv2.putText(frame, f"{label}: {prediction:.2f}", (10, 25+25*ind), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
     def _display_frames(self):
@@ -122,10 +126,11 @@ def dummy_inference_function(frames):
 
 if __name__ == "__main__":
     # config_path = osp.join('..', 'model_configs', 'mpigroup_multiclass_inference_debug.yaml')
-    config_path = osp.join('..', 'model_configs', 'miga_smi_downsampled.yaml')
+    # config_path = osp.join('..', 'model_configs', 'miga_smi_downsampled.yaml')
+    config_path = osp.join('..', 'model_configs', 'mac.yaml')
     args, _ = get_args(config_path)
     inference_object = ModelInference(args)
     # path_to_video = "D:\\Project-mpg microgesture\\imigue\\0001.mp4"
     path_to_video = None
-    pipeline = VideoPipeline(overlap_size=8, cycle_time=1, scale=2, inference_function=inference_object.run_inference)
+    pipeline = VideoPipeline(overlap_size=8, cycle_time=1, scale=2, inference_function=inference_object.run_inference, display_style='only_valid')
     pipeline.capture_video(source=path_to_video)
