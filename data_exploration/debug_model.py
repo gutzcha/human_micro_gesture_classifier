@@ -143,11 +143,12 @@ args = Namespace(
 
 
     start_epoch=0,
-    eval=False,
+    eval=True,
     dist_eval=False,
     num_workers = 10,
     pin_mem = True,
     enable_deepspeed=False,
+
 
 
 

@@ -198,8 +198,6 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 def validation_one_epoch(data_loader, model, device, criterion=None, is_one_hot=False, is_multilabel=False, is_hierarchical=False):
     if criterion is None:
         criterion = torch.nn.CrossEntropyLoss()
-    
-
     if is_multilabel:
         accuracy = accuracy_multilabel
     elif is_hierarchical:
@@ -260,8 +258,11 @@ def final_test(data_loader, model, device, file, criterion=None, is_one_hot=Fals
         criterion = torch.nn.CrossEntropyLoss()
     if is_multilabel:
         accuracy = accuracy_multilabel
+    elif is_hierarchical:
+        accuracy = partial(accuracy_hierarchical, inds_fine=range(52), inds_coarse=None)
     else:
         accuracy = accuracy_singlelabel
+
 
 
     metric_logger = utils.MetricLogger(delimiter="  ")
@@ -296,13 +297,12 @@ def final_test(data_loader, model, device, file, criterion=None, is_one_hot=Fals
             outputs = model(videos)
             loss = criterion(outputs, targets)
 
-        if is_multilabel or is_hierarchical:
-            try:
-                outputs = logit(outputs, dim=1)
-            except:
-                outputs = logit(outputs)
-
-
+        if is_multilabel:
+            outputs = logit(outputs)
+        elif is_hierarchical:
+            pass
+        elif is_one_hot:
+            pass
 
         for i in range(outputs.size(0)):
             # Debug

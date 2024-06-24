@@ -169,6 +169,26 @@ from utils import load_and_parse_txt
 #     return df_report, logits, gt
 
 
+# Function to convert DataFrame to formatted string
+def dataframe_to_string(df):
+    # Get the maximum width of each column
+    col_widths = [max(df[col].astype(str).map(len).max(), len(col)) for col in df.columns]
+
+    # Create format string
+    format_str = '| ' + ' | '.join(['{{:<{}}}'.format(width) for width in col_widths]) + ' |'
+
+    # Create the header and row separator
+    header = format_str.format(*df.columns)
+    row_separator = '-' * len(header)
+
+    # Create rows
+    rows = [format_str.format(*row) for row in df.values]
+
+    # Combine header, separator, and rows
+    formatted_string = '\n'.join([header, row_separator] + rows)
+
+    return formatted_string
+
 def generate_combined_report(path_to_folder: str, path_dataset_folder: str, feature_names: List[str] = None, th=0.5,
                              id_to_labels_map: Union[List, dict, None]=None ):
     if feature_names is None:
@@ -276,18 +296,26 @@ def generate_combined_report(path_to_folder: str, path_dataset_folder: str, feat
     # Save report
     df_report = df_report.reset_index()
     df_report = df_report.rename(columns={'index':'labels'})
-    df_report.to_csv(osp.join(path_to_folder, 'classification_report.csv'))
+    report_save_path = osp.join(path_to_folder, 'classification_report.csv')
+    df_report.to_csv(report_save_path)
 
     # Display ROC-AUC scores for each label
     for label, roc_auc in roc_auc_scores.items():
         print(f'ROC-AUC for {label}: {roc_auc}')
 
-    return df_report, logits, gt
+    report_txt = dataframe_to_string(df_report)
+    return df_report,report_save_path, report_txt, logits, gt
+
+
 
 if __name__ == '__main__':
     path_to_folder = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\mac_multi\eval_93'
     path_dataset_folder = r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\mac_multi\dataset'
     feature_names = None
-    df_report, _, _, = generate_combined_report(path_to_folder, path_dataset_folder, feature_names)
+    df_report, report_save_path,report_txt,  _, _, = generate_combined_report(path_to_folder, path_dataset_folder, feature_names)
     print(df_report)
     print('Done...')
+    # Save the formatted string to a text file
+    file_path = report_save_path.replace('csv','txt')
+    with open(file_path, 'w') as file:
+        file.write(report_txt)

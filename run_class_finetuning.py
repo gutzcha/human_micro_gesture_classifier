@@ -23,7 +23,7 @@ from utils import  multiple_samples_collate
 import utils
 from utils import HierarchicalCriterion
 # import modeling_finetune
-
+from data_exploration.generate_report import generate_combined_report
 
 def get_args(**kwargs):
     parser = argparse.ArgumentParser('VideoMAE fine-tuning and evaluation script for video classification', add_help=False)
@@ -543,13 +543,23 @@ def main(args, ds_init):
             pass
         if global_rank == 0:
             print("Start merging results...")
-            final_top1 ,final_top5 = merge(args.output_dir, num_tasks)
-            print(f"Accuracy of the network on the {len(dataset_test)} test videos: Top-1: {final_top1:.2f}%, Top-5: {final_top5:.2f}%")
-            log_stats = {'Final top-1': final_top1,
-                        'Final Top-5': final_top5}
+            # final_top1 ,final_top5 = merge(args.output_dir, num_tasks)
+
+            df_report, report_save_path,report_txt,  _, _, = generate_combined_report(path_to_folder=args.output_dir,
+                                                        path_dataset_folder=args.data_path, feature_names=None)
+
+            # print(f"Accuracy of the network on the {len(dataset_test)} test videos: Top-1: {final_top1:.2f}%, Top-5: {final_top5:.2f}%")
+            print(f'Final report saved at: {report_save_path}')
+            # log_stats = {'Final top-1': final_top1,
+            #             'Final Top-5': final_top5}
             if args.output_dir and utils.is_main_process():
                 with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
-                    f.write(json.dumps(log_stats) + "\n")
+                    # f.write(json.dumps(log_stats) + "\n")
+                    f.write(report_txt)
+            # if args.output_dir and utils.is_main_process():
+            #     with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
+            #         f.write(json.dumps(log_stats) + "\n")
+
         exit(0)
 
 
