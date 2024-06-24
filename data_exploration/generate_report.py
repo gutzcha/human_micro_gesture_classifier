@@ -7,21 +7,6 @@ import re
 import ast
 import numpy as np
 
-import subprocess
-import sys
-
-# Function to install a package
-
-# TODO : This is just a hack because i dont want to edit my image and install it
-def install(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-# Check if scikit-learn is installed, and install it if not
-try:
-    import sklearn
-except ImportError:
-    install("scikit-learn")
-
-
 from sklearn.metrics import classification_report, roc_auc_score, roc_curve, RocCurveDisplay,  average_precision_score
 import matplotlib.pyplot as plt
 import os.path as osp
