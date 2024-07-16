@@ -1,0 +1,39 @@
+000 (15542628.000.000) 2024-06-21 19:52:28 Job submitted from host: <10.15.2.1:9618?PrivAddr=%3c172.22.0.101:9618%3fsock%3dschedd_8280_f843%3e&PrivNet=internal.cluster.is.localnet&addrs=10.15.2.1-9618&alias=sched.cluster.is.localnet&noUDP&sock=schedd_8280_f843>
+...
+040 (15542628.000.000) 2024-06-21 19:52:33 Started transferring input files
+	Transferring to host: <172.22.2.107:9618?addrs=172.22.2.107-9618&alias=g107.internal.cluster.is.localnet&noUDP&sock=slot1_3_5239_196e_3803>
+...
+040 (15542628.000.000) 2024-06-21 19:52:37 Finished transferring input files
+...
+001 (15542628.000.000) 2024-06-21 19:52:38 Job executing on host: <172.22.2.107:9618?addrs=172.22.2.107-9618&alias=g107.internal.cluster.is.localnet&noUDP&sock=startd_5029_0dde>
+...
+006 (15542628.000.000) 2024-06-21 19:52:47 Image size of job updated: 5067776
+	237  -  MemoryUsage of job (MB)
+	242608  -  ResidentSetSize of job (KB)
+...
+006 (15542628.000.000) 2024-06-21 19:57:44 Image size of job updated: 146788072
+	237  -  MemoryUsage of job (MB)
+	242632  -  ResidentSetSize of job (KB)
+...
+040 (15542628.000.000) 2024-06-21 19:57:47 Started transferring output files
+...
+040 (15542628.000.000) 2024-06-21 19:57:47 Finished transferring output files
+...
+005 (15542628.000.000) 2024-06-21 19:57:47 Job terminated.
+	(1) Normal termination (return value 1)
+		Usr 0 00:44:14, Sys 0 00:11:16  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:44:14, Sys 0 00:11:16  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	64071  -  Run Bytes Sent By Job
+	3294101504  -  Run Bytes Received By Job
+	64071  -  Total Bytes Sent By Job
+	3294101504  -  Total Bytes Received By Job
+	Partitionable Resources :      Usage   Request Allocated Assigned
+	   Cpus                 :      12.46        16        16 
+	   Disk (KB)            : 3216979    209715200 214015343 
+	   Gpus (Average)       :                    1         1 "GPU-5896e301"
+	   Memory (MB)          :     237        16384     16384 
+
+	Job terminated of its own accord at 2024-06-21T17:57:44Z with exit-code 1.
+...

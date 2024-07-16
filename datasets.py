@@ -6,7 +6,8 @@ from kinetics import VideoClsDataset, VideoMAE, VideoMAE2VID
 from ssv2 import SSVideoClsDataset
 from dyadic_communication import DyadicvideoClsDataset
 from mpigroup.const import cropping_map as mpigroup_cropping_map
-
+from dyadic_communication_densepose import DensposeDyadicvideoClsDataset
+# import one_click_dense_pose.utils.
 class DataAugmentationForVideoMAE(object):
     def __init__(self, args):
         self.input_mean = [0.485, 0.456, 0.406]  # IMAGENET_DEFAULT_MEAN
@@ -205,7 +206,47 @@ def build_dataset(is_train, test_mode, args, anno_path=None):
             limit_data=args.limit_data,
             args=args)
         nb_classes = args.nb_classes
+    elif args.dataset == 'dyadic_communication_densepose':
 
+        mode = None
+        if is_train is True:
+            mode = 'train'
+            anno_path = os.path.join(args.data_path, 'train.csv') if anno_path is None else anno_path
+        elif test_mode is True:
+            mode = 'test'
+            anno_path = os.path.join(args.data_path, 'test.csv') if anno_path is None else anno_path
+        else:
+            mode = 'validation'
+            anno_path = os.path.join(args.data_path, 'val.csv') if anno_path is None else anno_path
+
+        # debug
+        # print('====================================')
+        # print('====================================')
+        # print('====================================')
+        # print(anno_path)
+        # print('====================================')
+        # print('====================================')
+        # print('====================================')
+        dataset = DensposeDyadicvideoClsDataset(
+            anno_path=anno_path,
+            data_path=args.data_path,
+            data_root=args.data_root,
+            mode=mode,
+            clip_len=1,
+            num_segment=args.num_frames,
+            test_num_segment=args.test_num_segment,
+            test_num_crop=args.test_num_crop,
+            num_crop=1 if not test_mode else 3,
+            keep_aspect_ratio=True,
+            crop_size=args.input_size,
+            short_side_size=args.short_side_size,
+            new_height=224,
+            new_width=224,
+            view_crop_mapping=mpigroup_cropping_map,
+            corner_crop_size=None,
+            limit_data=args.limit_data,
+            densepose_extractor=densepose_extractor(args),
+            args=args)
     elif args.data_set == 'UCF101':
         mode = None
         anno_path = None

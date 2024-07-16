@@ -8,8 +8,11 @@ from random import random
 import os.path as osp
 
 from mpigroup.load_model_inference import ModelInference, get_args
+
+
 class VideoPipeline:
-    def __init__(self, overlap_size=8, cycle_time=1, scale=1.0, inference_function=None, display_style='all', inds_to_include=None):
+    def __init__(self, overlap_size=8, cycle_time=1, scale=1.0, inference_function=None, display_style='all',
+                 inds_to_include=None):
         self.last_display_time = 0
         self.buffer = []
         self.overlap_size = overlap_size
@@ -26,8 +29,8 @@ class VideoPipeline:
         self.scale = scale
         self.display_style = display_style
         self.inds_to_include = inds_to_include
-    def capture_video(self, source):
 
+    def capture_video(self, source):
 
         # Capture video and add frames to buffer
         start_thread = True
@@ -82,11 +85,12 @@ class VideoPipeline:
             self.inference_thread.join()
             self.predictions = None
 
-    def _draw_predictions(self, frame, predictions):
+    def _draw_predictions(self, frame, predictions, top_k=5):
         if predictions is None:
             return
-
-        threshold = 0.8
+        if top_k > len(predictions):
+            top_k = len(predictions)
+        threshold = 0.15
 
         # Create a display map dictionary
         display_map = {}
@@ -95,40 +99,33 @@ class VideoPipeline:
         color_dict = {
             'above_th': (0, 255, 0),  # Green
             'below_th': (0, 0, 0),  # Black
-            'bellow_th_top1': (0, 255, 255)  # Yellow (Note: Corrected from 'bellow_th_top1:note-name this yellow')
+            'bellow_th_top1': (0, 0, 255)  # Blue?
         }
+        ignore_labels = ['other finger movements']
+        predictions = {key: value for key, value in predictions.items() if key not in ignore_labels}
 
         # Determine display logic based on predictions
         if self.display_style == 'all':
             display_all = True
+            top_k_predictions_dict = predictions
         else:
             display_all = False
-            max_label = max(predictions, key=predictions.get)
-            max_prob = predictions[max_label]
+            # max_label = max(predictions, key=predictions.get)
+            top_k_predictions = sorted(predictions, key=predictions.get, reverse=True)[:top_k]
+            top_k_predictions_dict = {k: predictions[k] for k in top_k_predictions}
 
-        for label, prediction in predictions.items():
+        for label, prediction in top_k_predictions_dict.items():
             # Determine color
             if prediction > threshold:
                 color = color_dict['above_th']
-            elif display_all:
+            else:
                 color = color_dict['below_th']
-            else:
-                if label == max_label:
-                    color = color_dict['bellow_th_top1']
-                else:
-                    continue  # Skip this label if not displaying all and not the top one
-
-            # Determine display logic
-            if display_all:
-                display = True
-            else:
-                display = (prediction > threshold or label == max_label)
 
             # Populate display_map
             display_map[label] = {
                 'color': color,
                 'probability': prediction,
-                'display': display
+                'display': True # display
             }
 
         # Draw labels on frame
@@ -138,6 +135,7 @@ class VideoPipeline:
                 ind += 1
                 cv2.putText(frame, f"{label}: {info['probability']:.2f}", (10, 25 + 25 * ind), cv2.FONT_HERSHEY_SIMPLEX,
                             1, info['color'], 2)
+
     def _display_frames(self):
         # Display frames with a lag
         display_delay = 1 / self.display_frame_rate
@@ -160,12 +158,17 @@ def dummy_inference_function(frames):
     return {"Label1": v1, "Label2": v2}
 
 
-
 if __name__ == "__main__":
     # config_path = osp.join('..', 'model_configs', 'mpigroup_multiclass_inference_debug.yaml')
     # config_path = osp.join('..', 'model_configs', 'miga_smi_downsampled.yaml')
     config_path = osp.join('..', 'model_configs', 'mac.yaml')
     args, _ = get_args(config_path)
+
+    # args.finetune = (r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\mac_multi'
+    #                  r'\split_loss_fine_coarse\eval_49\checkpoint-49.pth')
+    args.finetune = (r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\mac_multi'
+                     r'\split_loss_fine_coarse_aug\checkpoint-9.pth')
+
     inference_object = ModelInference(args)
     # path_to_video = "D:\\Project-mpg microgesture\\imigue\\0001.mp4"
     path_to_video = None

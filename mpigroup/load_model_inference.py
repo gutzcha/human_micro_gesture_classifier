@@ -7,7 +7,10 @@ from typing import List, Union
 from timm.models import create_model
 import torch
 from utils import load_state_dict, time_function_decorator
-from torch import sigmoid as logit
+# from torch import sigmoid as logit
+from torch import softmax as logit
+from functools import partial
+logit = partial(logit, dim=1)
 # from mpigroup.const import LABELS as LABELS_MAP
 # from miga.const import ID2LABELS_SMG_SHORT as LABELS_MAP
 import pandas as pd
@@ -145,8 +148,8 @@ class ModelInference:
         if inds_to_include is not None:
             logits = [logits[i] for i in inds_to_include]
             # logits = softmax(logits)
-            labels = [labels[i] for i in inds_to_include]
-        # df = pd.DataFrame(logits, columns=LABELS_MAP.values()).to_dict()
+            # labels = [labels[i] for i in inds_to_include]
+        # df = pd.DataFrame(logits, columns=LABELS_MAP.valuqes()).to_dict()
 
         return {a:v for a, v in zip(labels, logits)}
 

@@ -908,6 +908,7 @@ class HierarchicalCriterion(nn.Module):
         loss_fine = self.criteria['fine'](weight=fine_weights)(logits[:, self.fine_indices], fine_labels)
         loss_coarse = self.criteria['coarse'](pos_weight=coarse_weights)(logits[:, self.coarse_indices], coarse_labels)
 
+
         # Debug: Print loss values
         # print(f"loss_fine: {loss_fine.item()}, loss_coarse: {loss_coarse.item()}")
 

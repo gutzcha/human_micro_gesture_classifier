@@ -1,5 +1,5 @@
-from run_videomae_vis_v2 import main
-# from run_videomae_vis_folder import main
+# from run_videomae_vis_v2 import main
+from run_videomae_vis_folder import main
 # from run_videomae_vis_folder_extreact_features import main
 from types import SimpleNamespace as Namespace
 import os.path as osp
@@ -20,11 +20,13 @@ from glob import glob
 
 
 # image_path_list = glob(osp.join(samples_folder,'**','*.mp4'))
+samples_folder = r'D:\Project-mpg microgesture\mac2024\track1\val'
+image_path_list = glob(osp.join(samples_folder,'**','*.mp4'))
 
 # video_folder_name = '/videos/mpi_data/2Itzik/MPIIGroupInteraction/clips_train'
 # video_folder_name_val = '/videos/mpi_data/2Itzik/MPIIGroupInteraction/clips_val'
 # video_folder_name2 = '/videos/k400/train'
-video_folder_name3 = 'videos\\smg'
+# video_folder_name3 = 'videos\\smg'
 # image_path_list = [
 #     osp.join(video_folder_name_val,'06245-video1.mp4'),
 #     osp.join(video_folder_name_val,'07012-video.mp4'),
@@ -42,20 +44,20 @@ video_folder_name3 = 'videos\\smg'
 #     osp.join(video_folder_name2,'Uhyx80-ZyQE_000045_000055.mp4'),
 #     osp.join(video_folder_name2,'zzzzE0ncP1Y_000232_000242.mp4')
 #     ]
-image_path_list = [
-    # osp.join(video_folder_name3, "Sample0031_color0000.mp4"),
-    # osp.join(video_folder_name3, "Sample0031_color0001.mp4"),
-    # osp.join(video_folder_name3, "Sample0031_color0002.mp4"),
-    # osp.join(video_folder_name3, "Sample0031_color0003.mp4"),
-    osp.join(video_folder_name3, "Sample0031_color0010.mp4"),
-    osp.join(video_folder_name3, "Sample0031_color0011.mp4"),
-    osp.join(video_folder_name3, "Sample0031_color0012.mp4"),
-    osp.join(video_folder_name3, "Sample0031_color0013.mp4"),
-    # osp.join(video_folder_name3, "Sample0031_color0064.mp4"),
-    # osp.join(video_folder_name3, "Sample0031_color0065.mp4"),
-    # osp.join(video_folder_name3, "Sample0031_color0066.mp4"),
-    # osp.join(video_folder_name3, "Sample0031_color0067.mp4"),
-]
+# image_path_list = [
+#     # osp.join(video_folder_name3, "Sample0031_color0000.mp4"),
+#     # osp.join(video_folder_name3, "Sample0031_color0001.mp4"),
+#     # osp.join(video_folder_name3, "Sample0031_color0002.mp4"),
+#     # osp.join(video_folder_name3, "Sample0031_color0003.mp4"),
+#     osp.join(video_folder_name3, "Sample0031_color0010.mp4"),
+#     osp.join(video_folder_name3, "Sample0031_color0011.mp4"),
+#     osp.join(video_folder_name3, "Sample0031_color0012.mp4"),
+#     osp.join(video_folder_name3, "Sample0031_color0013.mp4"),
+#     # osp.join(video_folder_name3, "Sample0031_color0064.mp4"),
+#     # osp.join(video_folder_name3, "Sample0031_color0065.mp4"),
+#     # osp.join(video_folder_name3, "Sample0031_color0066.mp4"),
+#     # osp.join(video_folder_name3, "Sample0031_color0067.mp4"),
+# ]
 
 # We have several different models, each trained with a different setting:
 # 1. K400 - videoMAE trained on k400 for 1600 epochs, this is the baseline we are trying to improve
@@ -109,20 +111,25 @@ models_dict_list = [
 #     'checkpoint_path':'/videos/pretrained/MPIIGroupInteraction/k400_finetune_videomae_pretrain_dual_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100/checkpoint-99.pth',
 #     'model_name':'pretrain_videomae_base_patch16_224_densepose_dual',
 # },
+#        {
+#     'experiment':'MPIG_densepose_dual_2',
+#     'description':'MPIG_densepose_dual - videoMAE-K400 , same as K400 but then was finetuned on MPIGroupInteractions dataset (train set) for 100 epochs, with denspose as additional decoding target',
+#     'checkpoint_path':r'D:\Project-mpg microgesture\pretrained\pretrained\MPIIGroupInteraction\k400_finetune_videomae_pretrain_dual_2_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100\checkpoint-99.pth',
+#     'model_name':'pretrain_videomae_base_patch16_224_densepose_dual',
+# },
        {
-    'experiment':'MPIG_densepose_dual_2',
-    'description':'MPIG_densepose_dual - videoMAE-K400 , same as K400 but then was finetuned on MPIGroupInteractions dataset (train set) for 100 epochs, with denspose as additional decoding target',
-    'checkpoint_path':r'D:\Project-mpg microgesture\pretrained\pretrained\MPIIGroupInteraction\k400_finetune_videomae_pretrain_dual_2_patch16_224_frame_16x4_tube_mask_ratio_0.9_e100\checkpoint-99.pth',
-    'model_name':'pretrain_videomae_base_patch16_224_densepose_dual',
+    'experiment':'mac_multi',
+    'description':'',
+    'checkpoint_path':r'D:\Project-mpg microgesture\human_micro_gesture_classifier\experiments\mac_multi\split_loss_fine_coarse_70\checkpoint-9.pth',
+    'model_name':'vit_base_patch16_224',
 },
-
 
 ]
 
 # Generate save folders
 
 # save_folder_root = '/home/ubuntu/efs/videoMAE/video_samples_results'
-save_folder_root = r"D:\Project-mpg microgesture\human_micro_gesture_classifier\video_samples_results"
+save_folder_root = r"D:\Project-mpg microgesture\human_micro_gesture_classifier\extreacted_features_split_loss_fine_coarse_70"
 
 save_path_list = []
 for models_dict in models_dict_list:
